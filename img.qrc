@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/new/img">
+        <file>img/common.png</file>
+        <file>img/hardware.png</file>
+        <file>img/launcher.png</file>
+        <file>img/others.png</file>
+        <file>img/terminal.png</file>
+        <file>img/function.png</file>
+        <file>img/new.png</file>
+        <file>img/open.png</file>
+        <file>img/close.png</file>
+        <file>img/save.png</file>
+        <file>img/exit.png</file>
+        <file>img/info.png</file>
+        <file>img/doc.png</file>
+        <file>img/black.png</file>
+    </qresource>
+</RCC>
