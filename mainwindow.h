@@ -58,6 +58,8 @@ private slots:
 
     void on_actDoc_triggered();
 
+    void on_actReload_triggered();
+
 private:
     Ui::MainWindow *ui;
 

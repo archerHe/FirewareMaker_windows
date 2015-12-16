@@ -255,3 +255,8 @@ void MainWindow::on_actDoc_triggered()
     strList << Global::prj_home_path + "/doc/help.pdf";
     QProcess::startDetached(Global::evincePdf, strList);
 }
+
+void MainWindow::on_actReload_triggered()
+{
+
+}

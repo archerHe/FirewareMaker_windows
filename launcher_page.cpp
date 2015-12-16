@@ -16,7 +16,7 @@ Launcher_page::Launcher_page(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Launcher_page)
 {
-    ui->setupUi(this);
+   // ui->setupUi(this);
 
     initWidget();
    // disableWidget();
