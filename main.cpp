@@ -58,9 +58,9 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.setWindowFlags(w.windowFlags()&~Qt::WindowMaximizeButtonHint);
     QDesktopWidget *dw = QApplication::desktop();
-    w.setFixedSize(dw->width()*0.8, dw->height()*0.7);
+    w.setFixedSize(dw->width()*0.5, dw->height()*0.5);
 
-    qInstallMessageHandler(outputMessage);
+  //  qInstallMessageHandler(outputMessage);
 
     w.show();
 

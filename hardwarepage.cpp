@@ -119,6 +119,8 @@ void HardwarePage::loadCfg()
     QString dtsCfg = Global::srcPath + "/" + Global::dtsPath;
     QString kernelCfg = Global::srcPath + "/" + Global::kernelCfgPath;
 
+    textHelper.addState2Gc0310Dts(dtsCfg);
+
     preBackCamId    = textHelper.readCam("back", dtsCfg);
     preFrontCamId   = textHelper.readCam("front", dtsCfg);
     cb_back_cam->setCurrentIndex(preBackCamId);
@@ -170,7 +172,7 @@ void HardwarePage::saveCfg()
         textHelper.writeToText(boardCfg, "BUILD_DSDS", "true", ":=");
     }else
     {
-        qDebug() << "BUILD_DSDS";
+        qDebug() << "BUILD_DSDS:=false";
         textHelper.writeToText(boardCfg, "BUILD_DSDS", "false", ":=");
     }
     if(cb_screen->currentIndex() == 0)
@@ -178,16 +180,20 @@ void HardwarePage::saveCfg()
         textHelper.writeToText(kernelCfg, "USE_IPS_LCD", "n", "=" );
     }else
     {
-        qDebug() << "USE_IPS_LCD";
+        qDebug() << "USE_IPS_LCD=y";
         textHelper.writeToText(kernelCfg, "USE_IPS_LCD", "y", "=" );
     }
 
     textHelper.writeCam(preBackCamId, cb_back_cam->currentIndex(), dtsCfg);
-    //textHelper.writeCam(preFrontCamId + 6, cb_front_cam->currentIndex() + 6, dtsCfg);
-
-    QSqlDatabase db = QSqlDatabase::database("custom");
-
+    textHelper.writeCam(preFrontCamId + 6, cb_front_cam->currentIndex() + 6, dtsCfg);
+    //change current path
+    QDir::setCurrent("Project/" + Global::prj_name);
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
     QSqlQuery query = QSqlQuery(db);
+   // db.setDatabaseName(Global::prj_home_path + "/" + Global::prj_name +  "/" + Global::prj_name + ".db");
+    db.setDatabaseName(Global::prj_name + ".db");
+
+
     QString colon = "\"";
     QString strExec =   "insert into hardware values("
                         + QString::number(cb_screen->currentIndex(), 10) + ","
@@ -206,8 +212,6 @@ void HardwarePage::saveCfg()
                       + strSpace + "simCard=" + QString::number(cb_sim_num->currentIndex(), 10) + ","
                       + strSpace + "ddrFreq=" + colon + cb_ddr_fre->currentText() + colon;
 
-
-
  /*
     if(query.exec(strExec))
     {
@@ -218,14 +222,29 @@ void HardwarePage::saveCfg()
         qDebug() << strExec;
     }
 */
-           if(query.exec(strUpdate))
-           {
-               qDebug() << "update hardware ok";
-           }
-           else
+    if(db.isOpen())
+    {
+        if(!query.exec(strUpdate))
+        {
+            qDebug() << "update hardware fail  : db is already open";
+        }
+    }else
+    {
+        if(!db.open())
+        {
+            qDebug() << "db path : " + Global::prj_home_path + "/Project/" + Global::prj_name +  "/" + Global::prj_name + ".db";
+            qDebug() << "db open fail  :   HardwarePage::saveCfg()";
+            QMessageBox::warning(this, "Warning", tr("hardware::数据库打开失败～～"));
+        }else
+        {
+            QSqlQuery query = QSqlQuery(db);
+            if(!query.exec(strUpdate))
             {
-               qDebug() << "update hardware fail";
-               qDebug() << strUpdate;
-           }
+                qDebug() << "update hardware fail... db is not open and to open";
+                qDebug() << strUpdate;
+            }
+        }
+    }
+    QDir::setCurrent(Global::prj_home_path);
 
 }

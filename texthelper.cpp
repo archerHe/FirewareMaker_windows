@@ -41,7 +41,7 @@ QString TextHelper::readTextStr(QString filePath, QString objStr, QString typeFl
                 if(typeFlag == "xml")
                 {
                     resultStr = readXml(objLine);
-                    qDebug() <<  "objStr:" << objStr << "result:" << resultStr;
+               //     qDebug() <<  "objStr:" << objStr << "result:" << resultStr;
                     break;
                 }else if(typeFlag == "boardCfg")
                 {
@@ -50,6 +50,7 @@ QString TextHelper::readTextStr(QString filePath, QString objStr, QString typeFl
                     break;
                 }else if(typeFlag == "kernelCfg")
                 {
+                    file.close();
                     return "IPS";
                 }
                 QStringList strlist = objLine.split("=");
@@ -59,7 +60,7 @@ QString TextHelper::readTextStr(QString filePath, QString objStr, QString typeFl
         }
     }
     file.close();
-    qDebug() << objStr << " : " << resultStr;
+//    qDebug() << objStr << " : " << resultStr;
     return resultStr.trimmed();
 }
 
@@ -80,12 +81,14 @@ bool TextHelper::modifyXml(QString filePath, QString attr, QString newStr)
         return false;
     }
     QDomDocument doc;
+
     if(!doc.setContent(&file))
     {
+        file.close();
         return false;
     }
     file.close();
-
+  //  QDomProcessingInstruction
     QDomNode n = doc.firstChild();
     while(!n.isNull())
     {
@@ -93,6 +96,7 @@ bool TextHelper::modifyXml(QString filePath, QString attr, QString newStr)
         {
             QDomElement e = n.toElement();
             QDomNodeList nodeList = e.childNodes();
+            qDebug() << "nodeList length : " << nodeList.count();
             for(int i = 0; i < nodeList.count(); i++)
             {
                 QDomNode node = nodeList.at(i);
@@ -116,7 +120,8 @@ bool TextHelper::modifyXml(QString filePath, QString attr, QString newStr)
     }
 
     QTextStream out(&temp);
-    doc.save(out, 4, QDomNode::EncodingFromTextStream);
+  //  out.setCodec("UTF-8");
+    doc.save(out, 4, QDomNode::EncodingFromDocument);
     temp.flush();
     temp.close();
     QFile::remove(filePath);
@@ -147,7 +152,8 @@ int TextHelper::readCam(QString camType, QString dtsPath)
                     QStringList strlist1 = strLine.split(",");
                     QString str2 = strlist1[1];
                     QStringList strlist2 = str2.split("-");
-                    qDebug() << strlist2[0] << " camera_id: " << camera_id;
+    //                qDebug() << strlist2[0] << " camera_id: " << camera_id;
+                    dtsFile->close();
                     return camera_id;
                 }
                 camera_id++;
@@ -166,7 +172,7 @@ int TextHelper::readCam(QString camType, QString dtsPath)
             {
 
                 strLine = ts.readLine();
-                qDebug() << strLine;
+ //               qDebug() << strLine;
 
                 if(strLine.contains("compatible") || strLine.contains("//"))
                 {
@@ -178,7 +184,8 @@ int TextHelper::readCam(QString camType, QString dtsPath)
                     QStringList strlist1 = strLine.split(",");
                     QString str2 = strlist1[1];
                     QStringList strlist2 = str2.split("-");
-                    qDebug() << strlist2[0] << "camera_id: " << camera_id;
+  //                  qDebug() << strlist2[0] << "camera_id: " << camera_id;
+                    dtsFile->close();
                     return camera_id - 6;
                 }
                 camera_id++;
@@ -195,14 +202,11 @@ void TextHelper::writeCam(int preCamId, int curCamId, QString dtsPath)
     if(preCamId == curCamId)
         return;
     disableCam(preCamId, dtsPath);
-    //enableCam(curCamId, dtsPath);
+    enableCam(curCamId, dtsPath);
 }
 
-int TextHelper::disableCam(int camId, QString dtsPath)
+bool TextHelper::disableCam(int camId, QString dtsPath)
 {
-    //QString dtsPath;
-
-
     QFile   *dtsFile =  new QFile(dtsPath);
     QFile   *newDtsFile = new QFile(QDir::currentPath() + "/tmp/Sofia3GR-tablet.dts");
     QTextStream newDts(newDtsFile);
@@ -210,9 +214,15 @@ int TextHelper::disableCam(int camId, QString dtsPath)
     QString strLine;
     if(!dtsFile->open(QIODevice::ReadOnly))
     {
-        return -1;
+        qDebug() << "disableCam : dtsFile open fail";
+        return false;
     }
-    newDtsFile->open(QIODevice::WriteOnly);
+    if(!newDtsFile->open(QIODevice::WriteOnly))
+    {
+        qDebug() << "disableCam: newDtsFile open fail";
+        dtsFile->close();
+        return false;
+    }
     while(!dtsOld.atEnd())
     {
         strLine = dtsOld.readLine();
@@ -220,46 +230,30 @@ int TextHelper::disableCam(int camId, QString dtsPath)
         {
                newDts << strLine << "\n";
                newDts << "\t\tstatus = \"disabled\";\n";
-               if(camId == 7)
-               {
-                   newDts << "\t\tcompatible = \"galaxycore,gc0310-v4l2-i2c-subdev\";\n";
-               }
                strLine = dtsOld.readLine();
                continue;
         }
         newDts << strLine << "\n";
-
     }
     dtsFile->close();
     newDtsFile->flush();
     newDtsFile->close();
-   // dtsFile->remove();
 
-    if(dtsFile->remove())
+    if(!dtsFile->remove())
     {
-        qDebug() << "remove ok disableCam";
-    }else
-    {
-        qDebug() << "remove fail disableCam";
-        qDebug() << "(disableCam)dtsPath: " << dtsPath;
-        QStringList strList;
-        strList << "Z:/heyuan/android_rockchip_sofia3gr_5_1_source_code_2015_09_13_20_35_28/kernel/arch/x86/boot/dts/SF_3GR-tablet.dts";
-        QProcess::startDetached("del", strList);
+        qDebug() << "remove dtsFile fail disableCam";
+        return false;
     }
-    if(newDtsFile->copy(dtsPath))
-    {
-        qDebug() << "camId:" << camId << " file copy ok (disableCam)";
-    }else
+    if(!newDtsFile->copy(dtsPath))
     {
         qDebug() << "camId: " << camId << "file copy fail!!! (disableCam)";
     }
 
-    return camId;
+    return true;
 }
 
-int TextHelper::enableCam(int camId, QString dtsPath)
+bool TextHelper::enableCam(int camId, QString dtsPath)
 {
-    //QString dtsPath;
     QFile   *dtsFile =  new QFile(dtsPath);
     QFile   *newDtsFile = new QFile(QDir::currentPath() + "/tmp/Sofia3GR-tablet.dts");
     QTextStream newDts(newDtsFile);
@@ -267,9 +261,15 @@ int TextHelper::enableCam(int camId, QString dtsPath)
     QString strLine;
     if(!dtsFile->open(QIODevice::ReadOnly))
     {
-        return -1;
+        qDebug() << "dtsFile open fail  enableCam";
+        return false;
     }
-    newDtsFile->open(QIODevice::WriteOnly);
+    if(!newDtsFile->open(QIODevice::WriteOnly))
+    {
+        qDebug() << "newDtsFile open fail  enableCam";
+        dtsFile->close();
+        return false;
+    }
     while(!dtsOld.atEnd())
     {
         strLine = dtsOld.readLine();
@@ -281,40 +281,22 @@ int TextHelper::enableCam(int camId, QString dtsPath)
                continue;
         }
         newDts << strLine << "\n";
-
     }
     dtsFile->close();
     newDtsFile->flush();
     newDtsFile->close();
-    dtsFile->remove();
-    if(dtsFile->remove())
-    {
-        qDebug() << "remove ok enableCam";
-    }else
-    {
-        qDebug() << "remove fail enableCam";
-        qDebug() << "(enableCam)dtsPath: " << dtsPath;
-        QFile file("Z:/heyuan/android_rockchip_sofia3gr_5_1_source_code_2015_09_13_20_35_28/kernel/arch/x86/boot/dts/SF_3GR-tablet.dts");
-        if(file.remove())
-        {
-            qDebug() << "file.remove~~~~~~";
-        }else
-        {
-            qDebug() << "file.remove fail .....";
-        }
 
+    if(!dtsFile->remove())
+    {
+        qDebug() << "remove dtsFile fail enableCam";
+        return false;
     }
-
-    if(newDtsFile->copy(dtsPath))
-    {
-        qDebug() << "camId:" << camId << " file copy ok (enableCam)";
-    }else
+    if(!newDtsFile->copy(dtsPath))
     {
         qDebug() << "camId: " << camId << "file copy fail!!!(enableCam)";
-        return -1;
+        return false;
     }
-
-    return camId;
+    return true;
 }
 
 bool TextHelper::writeToText(QString filePath, QString str, QString value, QString split)
@@ -332,6 +314,7 @@ bool TextHelper::writeToText(QString filePath, QString str, QString value, QStri
     if(!tempFile->open(QIODevice::WriteOnly))
     {
         qDebug() << "tempFile return false";
+        oriFile->close();
         return false;
     }
     while(!oriTS.atEnd())
@@ -345,7 +328,7 @@ bool TextHelper::writeToText(QString filePath, QString str, QString value, QStri
                 continue;
             }
             tempTS << str << split << value << "\n";
-            qDebug() << "tempTS: " << str << split << value;
+  //          qDebug() << "tempTS: " << str << split << value;
             continue;
         }
         tempTS << strLine << "\n";
@@ -353,11 +336,12 @@ bool TextHelper::writeToText(QString filePath, QString str, QString value, QStri
     oriFile->close();
     tempFile->flush();
     tempFile->close();
-    oriFile->remove();
-    if(tempFile->copy(filePath))
+    if(!oriFile->remove())
     {
-        qDebug() << "copy ok" << filePath;
-    }else
+        qDebug() << "oriFile remove fail";
+        return false;
+    }
+    if(!tempFile->copy(filePath))
     {
         qDebug() << "copy fail" << filePath << "  str: " << str;
         return false;
@@ -381,6 +365,7 @@ bool TextHelper::addWallpaperXml(QString filePath, QString newStr)
     if(!tempXml.open(QIODevice::WriteOnly))
     {
         qDebug() << "tempXml open fail";
+        wallpaperXml.close();
         return false;
     }
     while(!wallpaperTS.atEnd())
@@ -397,15 +382,115 @@ bool TextHelper::addWallpaperXml(QString filePath, QString newStr)
     wallpaperXml.close();
     tempXml.flush();
     tempXml.close();
-    wallpaperXml.remove();
-
-    if(tempXml.copy(filePath))
-    {
-        qDebug() << "str:" << newStr << " file copy ok";
-    }else
+   if(!wallpaperXml.remove())
+   {
+        qDebug() << "remove wallpaperXml fail";
+        return false;
+   }
+    if(!tempXml.copy(filePath))
     {
         qDebug() << "addWallpaperXml: str: " << newStr << "file copy fail!!!";
+        return false;
     }
+    return true;
+}
+
+bool TextHelper::addState2Gc0310Dts(QString dtsPath)
+{
+    QFile   *dtsFile =  new QFile(dtsPath);
+    QFile   *newDtsFile = new QFile(QDir::currentPath() + "/tmp/Sofia3GR-tablet.dts");
+    QTextStream newDts(newDtsFile);
+    QTextStream dtsOld(dtsFile);
+    QString strLine;
+    int frontCamId = readCam("front", dtsPath) + 6;
+//  begin------      if gc0310 already add status switch, return true
+    {
+        if(!dtsFile->open(QIODevice::ReadOnly))
+        {
+            qDebug() << dtsPath << ": open fail --gc0310 already add status switch";
+            return false;
+        }
+        while(!dtsOld.atEnd())
+        {
+            strLine = dtsOld.readLine();
+            if(strLine.contains("camera-module@7"))
+            {  
+                strLine = dtsOld.readLine();
+                if(strLine.contains("status"))
+                {
+                    dtsFile->close();
+                    qDebug() << "gc0310 already add status";
+                    return true;
+                }else
+                {
+                    qDebug() << "gc0310 not add status";
+                    dtsFile->close();
+                    break;
+                }
+            }
+        }
+    dtsFile->close();
+    }
+ //  end  --------------------------------------------------------
+    if(!dtsFile->open(QIODevice::ReadOnly))
+    {
+        qDebug() << " dtsFile open fail.....";
+        return false;
+    }
+    if(!newDtsFile->open(QIODevice::WriteOnly))
+    {
+        qDebug() << " newDtsFile open fail";
+        dtsFile->close();
+        return false;
+    }
+    dtsOld.seek(0);
+    newDts.seek(0);
+    while(!dtsOld.atEnd())
+    {
+        strLine = dtsOld.readLine();
+        if(strLine.contains("camera-module@7"))
+        {
+            newDts << strLine << "\n";
+            strLine = dtsOld.readLine();
+            if(strLine.contains("status"))
+            {
+                dtsFile->close();
+                newDtsFile->close();
+                return true;
+            }else
+            {
+                if(frontCamId == 7)
+                {
+                    newDts << "\t\t//status = \"disabled\";\n";
+                    newDts << strLine << "\n";
+                    continue;
+                }else
+                {
+                    newDts << "\t\tstatus = \"disabled\";\n";
+                    newDts << strLine << "\n";
+                    continue;
+                }
+            }
+         }
+        newDts << strLine << "\n";
+    }
+    dtsFile->close();
+    newDtsFile->flush();
+    newDtsFile->close();
+    if(dtsFile->remove())
+    {
+        if(!newDtsFile->copy(dtsPath))
+        {
+            qDebug() << "dtsFile copy fail";
+            return false;
+        }
+    }else
+    {
+        qDebug() << "dtsFile remove fail :: " << dtsPath;
+        dtsFile->close();
+        return false;
+    }
+    return true;
 }
 
 

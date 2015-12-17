@@ -23,10 +23,11 @@ public:
 
     int     readCam(QString camType, QString dtsPath);
     void    writeCam(int preCamId, int curCamId, QString dtsPath);
-    int     disableCam(int camId, QString dts);
-    int     enableCam(int camId, QString dts);
+    bool     disableCam(int camId, QString dts);
+    bool     enableCam(int camId, QString dts);
     bool    writeToText(QString filePath, QString str, QString value, QString split);
     bool    addWallpaperXml(QString filePath, QString newLine);
+    bool    addState2Gc0310Dts(QString dtsPath);
 
 private:
     QString oriText;

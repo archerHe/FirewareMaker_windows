@@ -102,17 +102,12 @@ void Wizard::createPrj()
 
     Global::prj_name = lePrjName->text();
 
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "custom");
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", Global::prj_name);
     db.setDatabaseName(lePrjName->text() + ".db");
-    if(db.open())
-    {
-        qDebug()<<" Wizard : create database success";
-    }
-    else
+    if(!db.open())
     {
         qDebug()<<" Wizard: create fail database";
     }
-
     QSqlQuery query = QSqlQuery(db);
     if(db.tables().contains("common_page"))
     {
@@ -174,47 +169,32 @@ void Wizard::createPrj()
 
     if(query.exec(strCreatePage1))
     {
-        qDebug() << "create table commonpage success";
-    }
-    else
-    {
         qDebug() << "fail create commonpage table";
     }
     if(query.exec(strCreatePage2))
     {
-        qDebug() << "create table hardware success";
-    }
-    else
-    {
         qDebug() << "fail create hardware table";
     }
     if(query.exec(strInsertPage1))
-    {
-        qDebug() << "insert table commonpage success";
-    }else
     {
         qDebug() << "insert table commonpage fail";
         qDebug() << strInsertPage1;
     }
     if(query.exec(strInsertPage2))
     {
-        qDebug() << "insert table hardware success";
-    }else
-    {
          qDebug() << "insert table hardware fail";
          qDebug() << strInsertPage2;
     }
-
-
     QFile cfg(lePrjName->text() + "." + "prj");
     QTextStream out(&cfg);
     if(!cfg.open(QFile::WriteOnly))
     {
-
+        qDebug() << "cfg open fail";
     }
     out << "ProjectName=" << lePrjName->text() << endl;
     out << "ProjectPath=" << lePrjPath->text() << endl;
     cfg.close();
+    //reset current path
     QDir::setCurrent(Global::prj_home_path);
 #ifdef Q_OS_LINUX
     Global::textEditorPath = Global::geditTE;

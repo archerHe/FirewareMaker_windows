@@ -112,6 +112,7 @@ void MainWindow::initMainWindow()
 
     connect(listWidget, SIGNAL(currentRowChanged(int)), stackedWidget, SLOT(setCurrentIndex(int)));
 
+
     QHBoxLayout *main_layout = new QHBoxLayout();
     main_layout->addWidget(listWidget);
     main_layout->addWidget(stackedWidget);
@@ -258,5 +259,47 @@ void MainWindow::on_actDoc_triggered()
 
 void MainWindow::on_actReload_triggered()
 {
+    if(Global::srcPath == "")
+    {
+        QMessageBox::information(this, "information", tr("还未新建或打开工程~~~"));
+        return;
+    }
+    int curIndex = stackedWidget->currentIndex();
+    switch (curIndex) {
+    case 0:
+        commonPage.loadCfg();
+        break;
+    case 1:
+        hardwarePage.loadCfg();
+        break;
+    case 3:
+        othersPage.loadCfg();
+        break;
+    default:
+        QMessageBox::information(this, "information", tr("此页面不支持刷新"));
+        break;
+    }
+}
 
+void MainWindow::on_actApplyPage_triggered()
+{
+    if(Global::srcPath == "")
+    {
+        QMessageBox::information(this, "information", tr("请新建或打开工程后再进行此操作~~"));
+        return;
+    }
+    int curIndex = stackedWidget->currentIndex();
+    switch (curIndex) {
+    case 0:
+        commonPage.saveCfg();
+        break;
+    case 1:
+        hardwarePage.saveCfg();
+        break;
+    case 3:
+        othersPage.saveCfg();
+        break;
+    default:
+        break;
+    }
 }

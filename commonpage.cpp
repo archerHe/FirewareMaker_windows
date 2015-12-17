@@ -251,8 +251,9 @@ void CommonPage::saveCfg()
         textHelper.modifyXml(defSettingProvider, "def_screenshot_button_show", "true");
     }
 
-    QSqlDatabase db = QSqlDatabase::database("custom");
-
+    QDir::setCurrent("Project/" + Global::prj_name);
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName(Global::prj_name + ".db");
     QSqlQuery query = QSqlQuery(db);
     QString colon = "\"";
     QString strExec =   "insert into commonpage values(" + colon + Global::prj_name + colon + ","
@@ -295,14 +296,30 @@ void CommonPage::saveCfg()
         qDebug() << strExec;
     }
 */
-    if(query.exec(strUpdate))
+    if(db.isOpen())
     {
-        qDebug() << "update commonpage ok";
+        if(!query.exec(strUpdate))
+        {
+            qDebug() << "update commonpage fail  : db is already open";
+        }
+    }else
+    {
+        if(!db.open())
+        {
+            qDebug() << "db path : " + Global::prj_home_path + "/Project/" + Global::prj_name +  "/" + Global::prj_name + ".db";
+            qDebug() << "db open fail  :   commonpage::saveCfg()";
+            QMessageBox::warning(this, "Warning", tr("commonpage::数据库打开失败～～"));
+        }else
+        {
+            QSqlQuery query = QSqlQuery(db);
+            if(!query.exec(strUpdate))
+            {
+                qDebug() << "update commonpage fail... db is not open and to open";
+                qDebug() << strUpdate;
+            }
+        }
     }
-    else{
-        qDebug() << "update commonpage fail";
-        qDebug() << strUpdate;
-    }
+    QDir::setCurrent(Global::prj_home_path);
 }
 
 void CommonPage::openLanguageList()

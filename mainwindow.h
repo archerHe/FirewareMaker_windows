@@ -60,6 +60,8 @@ private slots:
 
     void on_actReload_triggered();
 
+    void on_actApplyPage_triggered();
+
 private:
     Ui::MainWindow *ui;
 
