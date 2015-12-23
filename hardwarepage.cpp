@@ -155,9 +155,6 @@ void HardwarePage::loadCfg()
     {
         cb_screen->setCurrentIndex(0);
     }
-
-
-
 }
 
 void HardwarePage::saveCfg()
@@ -177,7 +174,7 @@ void HardwarePage::saveCfg()
     }
     if(cb_screen->currentIndex() == 0)
     {
-        textHelper.writeToText(kernelCfg, "USE_IPS_LCD", "n", "=" );
+        textHelper.writeToText(kernelCfg, "#USE_IPS_LCD", "n", "=" );
     }else
     {
         qDebug() << "USE_IPS_LCD=y";

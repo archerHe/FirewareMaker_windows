@@ -33,6 +33,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    QLabel  *lbl_statusbar;
+
     void initDir();
     void initMainWindow();
 

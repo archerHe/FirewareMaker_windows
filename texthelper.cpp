@@ -3,10 +3,9 @@
 
 TextHelper::TextHelper()
 {
-    curPath = QDir::currentPath();
 
 }
-
+/*
 bool TextHelper::modifyTextStr(QString filePath, QString oriStr, QString newStr)
 {
     QFile file(filePath);
@@ -24,10 +23,10 @@ bool TextHelper::modifyTextStr(QString filePath, QString oriStr, QString newStr)
     }
     return true;
 }
-
+*/
 QString TextHelper::readTextStr(QString filePath, QString objStr, QString typeFlag)
 {
-    QString resultStr;
+    QString resultStr = NULL;
     QFile file(filePath);
     if(file.open(QIODevice::ReadOnly))
     {
@@ -170,7 +169,6 @@ int TextHelper::readCam(QString camType, QString dtsPath)
             QString s = "camera" + QString::number(camera_id, 10);
             if(strLine.contains(s) && strLine.contains(":"))
             {
-
                 strLine = ts.readLine();
  //               qDebug() << strLine;
 
@@ -394,7 +392,10 @@ bool TextHelper::addWallpaperXml(QString filePath, QString newStr)
     }
     return true;
 }
-
+/*
+ * 默认前置为gc0310，但是dts文件0310选项没有status一行，需要加上status一行，和其他摄像头选项保持一致
+ *
+ */
 bool TextHelper::addState2Gc0310Dts(QString dtsPath)
 {
     QFile   *dtsFile =  new QFile(dtsPath);

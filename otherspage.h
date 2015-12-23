@@ -31,6 +31,8 @@ public:
     void initWidget();
     bool copyRecursively(const QString &srcFilePath,const QString &tgtFilePath);
     bool copyDir(const QString &source, const QString &destination, bool override);
+    void disableWidget();
+    void enableWidget();
 
 public slots:
     void selectWallpaper();
@@ -56,6 +58,10 @@ private:
     QLabel          *lbl_extFiles;
     QLineEdit       *le_extFiles;
     QPushButton     *btn_extFiles;
+    QLabel          *lbl_logo;
+    QLabel          *lbl_img_logo;
+    QLineEdit       *le_logo;
+    QPushButton *btn_logo;
 
     QString         wallpaper_600dp;
     QString         wallpaper_720dp;

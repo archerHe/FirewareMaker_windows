@@ -72,8 +72,6 @@ void Wizard::initSecondPage()
 
 void Wizard::createPrj()
 {
-
-
     QDir *qDir = new QDir();
     qDebug() << "currentPath::: " <<  QDir::currentPath();
     if(qDir->exists("Project"))
@@ -200,6 +198,8 @@ void Wizard::createPrj()
     Global::textEditorPath = Global::geditTE;
 #endif
     Global::textEditorPath = Global::notepad2TE;
+
+
 }
 
 void Wizard::on_choosePrjBtn_clicked()
@@ -211,7 +211,6 @@ void Wizard::on_choosePrjBtn_clicked()
     {
         Global::srcPath = dirName;
         qDebug() << "this is android root dir : " << Global::srcPath;
-
     }
     else
     {

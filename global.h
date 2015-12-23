@@ -19,6 +19,7 @@ public:
     static QString geditTE;
     static QString evincePdf;
     static QString notepad2TE;
+    static QString mingw64;
 
 
 };

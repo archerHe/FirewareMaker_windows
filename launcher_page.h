@@ -11,6 +11,7 @@
 #include <QSpacerItem>
 #include <QDesktopServices>
 #include <QMessageBox>
+#include <QProcess>
 #include "global.h"
 #include "texthelper.h"
 
@@ -38,12 +39,17 @@ public slots:
 private slots:
     void btn_wallpaper_choose();
     void btnOpenWallpaperDir();
+    void showResult();
+    void showState(QProcess::ProcessState);
+    void showError();
+  //  void showFinished(QProcess::ExitStatus);
 
 
 private:
     Ui::Launcher_page *ui;
 
     TextHelper  textHelper;
+    QProcess    *p;
 
     QSpacerItem *vSpacer;
     QSpacerItem *hSpacer;

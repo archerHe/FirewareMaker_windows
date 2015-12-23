@@ -60,8 +60,10 @@ void MainWindow::initMainWindow()
     prj_home_path = QDir::currentPath();
     textEditorPath = "";
 
-
-
+    lbl_statusbar = new QLabel();
+    lbl_statusbar->setText(tr("还未打开工程"));
+    //ui->statusBar->addPermanentWidget(lbl_statusbar);
+    ui->statusBar->addWidget(lbl_statusbar);
     listItemCommon = new QListWidgetItem();
     QIcon  icon(":/new/img/img/common.png");
     listItemCommon->setIcon(icon);
@@ -143,13 +145,13 @@ void MainWindow::settingTECancel()
     return;
 }
 
-
 void MainWindow::on_actNew_triggered()
 {
     Wizard *wizard = new Wizard(this);
     connect(wizard, SIGNAL(finished(int)), &commonPage, SLOT(loadCfg()));
     connect(wizard, SIGNAL(finished(int)), &hardwarePage, SLOT(loadCfg()));
     connect(wizard, SIGNAL(finished(int)), &othersPage,  SLOT(loadCfg()));
+    connect(wizard, SIGNAL(finished(int)), &launcher_page, SLOT(loadCfg()));
 
     wizard->exec();
 }
@@ -167,9 +169,9 @@ void MainWindow::on_actOpen_triggered()
     commonPage.loadCfg();
     hardwarePage.loadCfg();
     othersPage.loadCfg();
+    launcher_page.loadCfg();
+    lbl_statusbar->setText(Global::srcPath);
 }
-
-
 
 void MainWindow::on_actSetingTE_triggered()
 {
@@ -211,7 +213,7 @@ void MainWindow::on_actSave_triggered()
 {
     commonPage.saveCfg();
     hardwarePage.saveCfg();
-    launcher_page.saveCfg();
+//    launcher_page.saveCfg();
     othersPage.saveCfg();
 }
 
@@ -229,7 +231,6 @@ void MainWindow::on_actClose_triggered()
     {
         return;
     }
-
 }
 
 void MainWindow::on_actExit_triggered()
@@ -272,6 +273,8 @@ void MainWindow::on_actReload_triggered()
     case 1:
         hardwarePage.loadCfg();
         break;
+    case 2:
+        launcher_page.loadCfg();
     case 3:
         othersPage.loadCfg();
         break;
@@ -296,6 +299,8 @@ void MainWindow::on_actApplyPage_triggered()
     case 1:
         hardwarePage.saveCfg();
         break;
+    case 2:
+        launcher_page.saveCfg();
     case 3:
         othersPage.saveCfg();
         break;

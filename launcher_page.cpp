@@ -10,7 +10,8 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QDebug>
-
+#include <QImage>
+#include <QMessageBox>
 
 Launcher_page::Launcher_page(QWidget *parent) :
     QWidget(parent),
@@ -19,7 +20,7 @@ Launcher_page::Launcher_page(QWidget *parent) :
    // ui->setupUi(this);
 
     initWidget();
-   // disableWidget();
+    disableWidget();
 }
 
 Launcher_page::~Launcher_page()
@@ -29,6 +30,10 @@ Launcher_page::~Launcher_page()
 
 void Launcher_page::initWidget()
 {
+    p = new QProcess(this);
+    connect(p, SIGNAL(readyRead()), this, SLOT(showResult()));
+    connect(p, SIGNAL(readyReadStandardError()), this, SLOT(showError()));
+    connect(p, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(showState(QProcess::ProcessState)));
     lbl_wallpaper = new QLabel("添加壁纸路径:");
     lbl_wallpaper->setToolTip("需要提前准备小分辨率图片");
     le_wallpaper = new QLineEdit();
@@ -96,60 +101,50 @@ void Launcher_page::enableWidget()
         w->setEnabled(true);
     }
 }
-/*
- * 暂时只对launcher源码里修改，后续添加在overlay下
- *
-*/
+
 void Launcher_page::cpWallpaper(QString extWallpaperPath)
 {
-
-    QString wallpaperPath = Global::srcPath + "/packages/apps/Launcher3/res/drawable-sw600dp-nodpi/";
-    QString wallpaperXml =  Global::srcPath + "/packages/apps/Launcher3/res/values/wallpapers.xml";
-
-    QString overlayLauncher = Global::srcPath + "/" + Global::overlayPath + "/packages/apps/Launcher3";
-
-    QString Prj_wallpaper = Global::prj_home_path + "/Project/" + Global::prj_name + "/wallpaper";
-
-    QDir *dir = new QDir(extWallpaperPath);
-    QStringList fileList = dir->entryList();
-    for(int i = 2; i < fileList.length(); i++)
-    {
-        QFile::copy(extWallpaperPath + "/" + fileList[i], wallpaperPath + fileList[i]);
-        QString fileName = fileList[i];
-        QStringList nameList = fileName.split(".");
-        textHelper.addWallpaperXml(wallpaperXml, nameList[0]);
-
-    }
-
-
-/*
- *拷贝到overlay下
- *
+    /* 用bash脚本拷贝壁纸
+    QStringList strList;
+    QString command = Global::mingw64 + "\\bash.exe";
+    strList << "test.sh" << Global::mingw64 << Global::srcPath << extWallpaperPath << "2";
+    qDebug() << command;
+   // strList << Global::mingw64 << Global::prj_home_path + "\\bin\\bash_helper.sh"<< Global::srcPath << extWallpaperPath << "2";
+   qDebug() << strList;
+    p->start("bash", strList);
 */
-  /*
-    QDir *dir = new QDir(extWallpaperPath);
-    QStringList fileList = dir->entryList();
-    QString overlayLauncher = Global::srcPath + "/" + Global::overlayPath + "/packages/apps/Launcher3/res";
-    QString wallpaperOverlay = Global::srcPath + "/" + Global::overlayPath + "/packages/apps/Launcher3/res/drawable-sw600dp-nodpi/";
-    QDir *overlay = new QDir(overlayLauncher);
-    if(overlay->exists())
+
+    QDir *extDir = new QDir(extWallpaperPath);
+    QStringList fileList = extDir->entryList();
+    QString pathWallpaperOverlay = Global::srcPath + "/" + Global::overlayPath + "/packages/apps/Launcher3/res/drawable-nodpi";
+    QString wallpaperXml =  Global::srcPath + "/packages/apps/Launcher3/res/values/wallpapers.xml";
+    QDir *overlayDir = new QDir(pathWallpaperOverlay);
+    if(fileList.length() > 2)
     {
-        overlay->mkpath("drawable-sw600dp-nodpi");
+        if(!overlayDir->mkpath(pathWallpaperOverlay))
+        {
+            qDebug() << "mkpath fail.. " << pathWallpaperOverlay;
+            QMessageBox::critical(this, tr("错误警告 : "), tr("创建目录") + pathWallpaperOverlay + tr("失败,请检查目标路径是否有可写权限，或目标路径被文件浏览器打开"));
+            return;
+        }
         for(int i = 2; i < fileList.length(); i++)
         {
-            QFile::copy(extWallpaperPath + "/" + fileList[i], wallpaperOverlay + fileList[i]);
-            QString fileName = fileList[i];
-            QStringList nameList = fileName.split(".");
-            qDebug() << nameList[0];
+            QStringList nameList = fileList[i].split(".");
+            QImage srcImg(extWallpaperPath + "/" + fileList[i]);
+            qDebug() << extWallpaperPath + "/" + fileList[i];
+            QImage smlImg = srcImg.scaled(200,200);
+            if(!smlImg.save(pathWallpaperOverlay + "/" + nameList[0] + "_small." + nameList[1]))
+            {
+                qDebug() << "small image save fail";
+            }
+            QFile::copy(extWallpaperPath + "/" + fileList[i], pathWallpaperOverlay +"/" + fileList[i]);
+            qDebug() << pathWallpaperOverlay + "/" + nameList[0] + "_small." + nameList[1];
             textHelper.addWallpaperXml(wallpaperXml, nameList[0]);
         }
     }else
     {
-        qDebug() << overlayLauncher;
-        qDebug() << wallpaperOverlay;
-        overlay->mkpath("drawable-sw600dp-nodpi");
+        QMessageBox::information(this, tr("提示～～～"), tr("壁纸文件夹内空。。。。。"));
     }
-    */
 }
 
 void Launcher_page::loadCfg()
@@ -176,13 +171,37 @@ void Launcher_page::btn_wallpaper_choose()
     QFileDialog *fileDlg = new QFileDialog();
     QString wallpaperPath = fileDlg->getExistingDirectory(this);
     le_wallpaper->setText(wallpaperPath);
-    cpWallpaper(wallpaperPath);
 }
 
 void Launcher_page::btnOpenWallpaperDir()
 {
-
+    if(Global::srcPath == "")
+    {
+        QMessageBox::warning(this, "提示框", "必须先新建工厂或导入现有工程才可以修改！！", QMessageBox::Abort);
+        return;
+    }
     QDesktopServices::openUrl(QUrl(Global::srcPath + "/packages/apps/Launcher3/res/drawable-sw600dp-nodpi", QUrl::TolerantMode));
+}
+
+void Launcher_page::showResult()
+{
+    qDebug() << "showResult: " << QString(p->readAll());
+}
+
+void Launcher_page::showState(QProcess::ProcessState state)
+{
+    if(state == QProcess::NotRunning)
+        qDebug() << "process notRunning";
+    else if(state == QProcess::Starting)
+        qDebug() << "process starting";
+    else{
+        qDebug() << "Running";
+    }
+}
+
+void Launcher_page::showError()
+{
+    qDebug() << "showError: " << p->readAllStandardError();
 }
 
 
