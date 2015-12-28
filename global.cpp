@@ -15,3 +15,4 @@ QString Global::textEditorPath = "";
 QString Global::evincePdf = "/usr/bin/evince";
 QString Global::notepad2TE = QDir::currentPath() + "/tools/Notepad2.exe";
 QString Global::mingw64 = "D:/WorkTools/Git/usr/bin";
+QString Global::saveErr = "";

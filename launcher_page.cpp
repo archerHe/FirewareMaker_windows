@@ -46,6 +46,7 @@ void Launcher_page::initWidget()
     btn_icon_site = new QPushButton("打开配置文件");
     btn_icon_site->setFixedWidth(100);
     btn_icon_site->setToolTip("打开桌面图标设置xml文件");
+    connect(btn_icon_site, SIGNAL(clicked()), this, SLOT(btn_openWallpaperXml()));
 
     lbl_def_wallpaper   = new QLabel("默认壁纸:");
     lbl_img         = new QLabel();
@@ -180,7 +181,14 @@ void Launcher_page::btnOpenWallpaperDir()
         QMessageBox::warning(this, "提示框", "必须先新建工厂或导入现有工程才可以修改！！", QMessageBox::Abort);
         return;
     }
-    QDesktopServices::openUrl(QUrl(Global::srcPath + "/packages/apps/Launcher3/res/drawable-sw600dp-nodpi", QUrl::TolerantMode));
+    QDir *dir = new QDir();
+    if(!dir->exists(Global::srcPath + "/" + Global::devicePath + "/packages/apps/Launcher3/res/drawable-sw600dp-nodpi"))
+    {
+        QDesktopServices::openUrl(QUrl(Global::srcPath + "/packages/apps/Launcher3/res/drawable-sw600dp-nodpi", QUrl::TolerantMode));
+    }else
+    {
+        QDesktopServices::openUrl(QUrl(Global::srcPath + "/" + Global::devicePath + "/overlay_aosp/packages/apps/Launcher3/res/drawable-sw600dp-nodpi", QUrl::TolerantMode));
+    }
 }
 
 void Launcher_page::showResult()
@@ -202,6 +210,22 @@ void Launcher_page::showState(QProcess::ProcessState state)
 void Launcher_page::showError()
 {
     qDebug() << "showError: " << p->readAllStandardError();
+}
+
+void Launcher_page::btn_openWallpaperXml()
+{
+    if(Global::srcPath == "")
+    {
+        QMessageBox::warning(this, "提示框", "必须先新建工厂或导入现有工程才可以修改！！", QMessageBox::Abort);
+        return;
+    }
+    if(!QFile::exists(Global::srcPath + "/" + Global::devicePath + "/overlay_aosp/packages/apps/Launcher3/res/xml/default_workspace_5x6.xml"))
+    {
+        QDesktopServices::openUrl(QUrl(Global::srcPath + "/packages/apps/Launcher3/res/xml"));
+    }else
+    {
+        QDesktopServices::openUrl(QUrl(Global::srcPath + "/" + Global::devicePath + "/overlay_aosp/packages/apps/Launcher3/res/xml"));
+    }
 }
 
 

@@ -77,6 +77,7 @@ bool TextHelper::modifyXml(QString filePath, QString attr, QString newStr)
     QFile file(filePath);
     if(!file.open(QIODevice::ReadOnly))
     {
+        Global::saveErr.append(filePath + "open fail\n");
         return false;
     }
     QDomDocument doc;
@@ -84,6 +85,7 @@ bool TextHelper::modifyXml(QString filePath, QString attr, QString newStr)
     if(!doc.setContent(&file))
     {
         file.close();
+        Global::saveErr.append("QDomDocument setContent fail");
         return false;
     }
     file.close();
@@ -115,6 +117,7 @@ bool TextHelper::modifyXml(QString filePath, QString attr, QString newStr)
     if(!temp.open(QIODevice::WriteOnly))
     {
         qDebug() << "tmp/tmp.xml open fail!!";
+        Global::saveErr.append(Global::prj_home_path + "/tmp/tmp.xml open fail\n");
         return false;
     }
 
@@ -124,8 +127,12 @@ bool TextHelper::modifyXml(QString filePath, QString attr, QString newStr)
     temp.flush();
     temp.close();
     QFile::remove(filePath);
-    QFile::copy(Global::prj_home_path + "/tmp/tmp.xml", filePath);
-
+    if(!QFile::copy(Global::prj_home_path + "/tmp/tmp.xml", filePath))
+    {
+        Global::saveErr.append(Global::prj_home_path + "/tmp/tmp.xml copy fail");
+        return false;
+    }
+    return true;
 }
 
 int TextHelper::readCam(QString camType, QString dtsPath)
@@ -307,11 +314,13 @@ bool TextHelper::writeToText(QString filePath, QString str, QString value, QStri
     if(!oriFile->open(QIODevice::ReadOnly))
     {
         qDebug() << "oriFile return false";
+        Global::saveErr.append(filePath + "open fail\n");
         return false;
     }
     if(!tempFile->open(QIODevice::WriteOnly))
     {
         qDebug() << "tempFile return false";
+        Global::saveErr.append(QDir::currentPath() + "/tmp/temp.txt   open fail\n");
         oriFile->close();
         return false;
     }
@@ -337,11 +346,13 @@ bool TextHelper::writeToText(QString filePath, QString str, QString value, QStri
     if(!oriFile->remove())
     {
         qDebug() << "oriFile remove fail";
+        Global::saveErr.append(filePath + "remove fail \n");
         return false;
     }
     if(!tempFile->copy(filePath))
     {
         qDebug() << "copy fail" << filePath << "  str: " << str;
+        Global::saveErr.append(QDir::currentPath() + "/tmp/temp.txt  override fail\n");
         return false;
     }
     return true;

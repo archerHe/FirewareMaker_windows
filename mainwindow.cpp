@@ -161,6 +161,7 @@ void MainWindow::on_actOpen_triggered()
     QString prj_open_path = QFileDialog::getOpenFileName(this, "导入现有工程", Global::prj_home_path, "*.prj");
     Global::srcPath = textHelper.readTextStr(prj_open_path, "ProjectPath", "");
     Global::prj_name = textHelper.readTextStr(prj_open_path, "ProjectName", "");
+    Global::saveErr = "";
     qDebug() << Global::srcPath << "...." << Global::prj_name;
 #ifdef Q_OS_LINUX
     Global::textEditorPath = Global::geditTE;

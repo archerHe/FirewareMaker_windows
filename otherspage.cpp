@@ -26,7 +26,6 @@ void OthersPage::initWidget()
     scroll->setWidget(w);
     gridLayout      = new QGridLayout(w);
 
-    QSpacerItem *hSpace = new QSpacerItem(40,20, QSizePolicy::Fixed, QSizePolicy::Fixed);
     lbl_wallpaper   = new QLabel("默认壁纸:");
     lbl_img         = new QLabel();
     le_wallpaper    = new QLineEdit();
@@ -41,20 +40,27 @@ void OthersPage::initWidget()
     connect(btn_extFiles, SIGNAL(clicked(bool)), this, SLOT(selectExtFiles()));
     lbl_logo = new QLabel("开机logo");
     lbl_img_logo = new QLabel();
-    le_logo = QLineEdit();
+    le_logo =new QLineEdit();
     le_logo->setFocusPolicy(Qt::NoFocus);
     btn_logo = new QPushButton("选择开机logo");
-
+    connect(btn_logo, SIGNAL(clicked()), this, SLOT(selectLogo()));
+    lbl_preinstall = new QLabel("可卸载APK");
+    le_preinstall   = new QLineEdit();
+    btn_preinstall = new QPushButton("选择apk拷贝目录");
+    connect(btn_preinstall, SIGNAL(clicked()), this, SLOT(selectPreinstall()));
+    lbl_system      = new QLabel("不可卸载APK");
+    le_system       = new QLineEdit();
+    btn_system    = new QPushButton("选择apk拷贝目录");
+    connect(btn_system, SIGNAL(clicked()), this, SLOT(selectSystemApp()));
 
     QImage img;
     img.load(":/new/img/img/black.png");
     QImage result = img.scaled(200,200);
     lbl_img->setPixmap(QPixmap::fromImage(result));
-    QImage logo_img;
-    img.load(":/new/img/img/black.png");
-    QImage logo_sml = logo_img.scaled(200,200);
-    lbl_img_logo->setPixmap(QPixmap::fromImage(logo_sml));
-asdfasf
+   // QImage logo_img;
+   // img.load(":/new/img/img/black.png");
+  //  QImage logo_sml = logo_img.scaled(200,200);
+    lbl_img_logo->setPixmap(QPixmap::fromImage(result));
     gridLayout->setColumnStretch(1,3);
     gridLayout->addWidget(lbl_wallpaper, 0, 0, 1, 1);
     gridLayout->addWidget(lbl_img, 0, 1, 1, 2);
@@ -64,7 +70,17 @@ asdfasf
     gridLayout->addWidget(lbl_extFiles,2, 0);
     gridLayout->addWidget(le_extFiles, 2, 1, 1, 3);
     gridLayout->addWidget(btn_extFiles, 2, 3);
-    gridLayout->addItem(new QSpacerItem(20,40, QSizePolicy::Expanding, QSizePolicy::Expanding), 3, 0);
+    gridLayout->addWidget(lbl_logo, 3, 0);
+    gridLayout->addWidget(lbl_img_logo, 3, 1);
+    gridLayout->addWidget(le_logo, 4, 0, 1, 3);
+    gridLayout->addWidget(btn_logo, 4, 3);
+    gridLayout->addWidget(lbl_preinstall, 5, 0);
+    gridLayout->addWidget(le_preinstall, 5, 1, 1, 3);
+    gridLayout->addWidget(btn_preinstall, 5, 3);
+    gridLayout->addWidget(lbl_system, 6, 0);
+    gridLayout->addWidget(le_system, 6, 1, 1, 3);
+    gridLayout->addWidget(btn_system, 6, 3);
+    gridLayout->addItem(new QSpacerItem(20,40, QSizePolicy::Expanding, QSizePolicy::Expanding), 7, 0);
   //  gridLayout->setSpacing(20);
     vLayout         = new QVBoxLayout(this);
     vLayout->addWidget(scroll);
@@ -93,6 +109,7 @@ void OthersPage::loadCfg()
     wallpaper_600dp = Global::srcPath + "/frameworks/base/core/res/res/drawable-sw600dp-nodpi/default_wallpaper.jpg";
     wallpaper_720dp = Global::srcPath + "/frameworks/base/core/res/res/drawable-sw720dp-nodpi/default_wallpaper.jpg";
     wallpaper_nodp  = Global::srcPath + "/frameworks/base/core/res/res/drawable-nodpi/default_wallpaper.jpg";
+    QString logo_path = Global::srcPath + "/" + Global::devicePath + "/boot_logo/splash_screen.jpg";
     if(!QFile::exists(pathWallpaper600Overlay))
     {
         QImage img;
@@ -106,12 +123,25 @@ void OthersPage::loadCfg()
         QImage result = img.scaled(200,200);
         lbl_img->setPixmap(QPixmap::fromImage(result));
     }
+    if(!QFile::exists(logo_path))
+    {
+        QMessageBox::warning(this, tr("警告～～"), tr("logo图片不存在。。"));
+    }else
+    {
+        QImage img;
+        img.load(logo_path);
+        QImage res = img.scaled(200,200);
+        lbl_img_logo->setPixmap(QPixmap::fromImage(res));
+    }
 }
 
 void OthersPage::saveCfg()
 {
     copyExtFiles();
     copyDefWallpaper();
+    copyLogo();
+    copyPreinstall();
+    copySystemApp();
 }
 
 void OthersPage::selectExtFiles()
@@ -168,33 +198,34 @@ void OthersPage::copyExtFiles()
 
     copyDir(le_extFiles->text(), Global::srcPath + "/" + Global::devicePath + "/presentation_file", false);
 }
-/*
- bool OthersPage::copyRecursively(const QString &srcFilePath,
-                            const QString &tgtFilePath)
+
+void OthersPage::selectLogo()
 {
-    QFileInfo srcFileInfo(srcFilePath);
-    if (srcFileInfo.isDir()) {
-        QDir targetDir(tgtFilePath);
-        targetDir.cdUp();
-        if (!targetDir.mkdir(QFileInfo(tgtFilePath).fileName()))
-            return false;
-        QDir sourceDir(srcFilePath);
-        QStringList fileNames = sourceDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
-        foreach (const QString &fileName, fileNames) {
-            const QString newSrcFilePath
-                    = srcFilePath + QLatin1Char('/') + fileName;
-            const QString newTgtFilePath
-                    = tgtFilePath + QLatin1Char('/') + fileName;
-            if (!copyRecursively(newSrcFilePath, newTgtFilePath))
-                return false;
-        }
-    } else {
-        if (!QFile::copy(srcFilePath, tgtFilePath))
-            return false;
-    }
-    return true;
+    QString def_logo = QFileDialog::getOpenFileName(this, "选择开机logo", "/home/heyuan", "图片文件(*jpg)");
+    if(def_logo == "")
+        return;
+    le_logo->setText(def_logo);
+    QImage img(def_logo);
+    QImage res = img.scaled(200,200);
+    lbl_img_logo->setPixmap(QPixmap::fromImage(res));
 }
-*/
+
+void OthersPage::selectPreinstall()
+{
+    QString preinstallPath = QFileDialog::getExistingDirectory(this);
+    if(preinstallPath == "")
+        return;
+    le_preinstall->setText(preinstallPath);
+}
+
+void OthersPage::selectSystemApp()
+{
+    QString systemAppPath = QFileDialog::getExistingDirectory(this);
+    if(systemAppPath == "")
+        return;
+    le_system->setText(systemAppPath);
+}
+
  bool OthersPage::copyDir(const QString &source, const QString &destination, bool override)
  {
      QDir directory(source);
@@ -259,5 +290,63 @@ void OthersPage::copyExtFiles()
      {
          QWidget *w = qobject_cast<QWidget *>(list.at(i));
          w->setEnabled(true);
+     }
+ }
+
+ void OthersPage::copyLogo()
+ {
+     if(le_logo->text() == "")
+     {
+         return;
+     }
+     QString logo_path = Global::srcPath + "/" + Global::devicePath + "/boot_logo/splash_screen.jpg";
+     if(!QFile::exists(logo_path))
+     {
+         QFile::copy(le_logo->text(), logo_path);
+     }else
+     {
+         if(!QFile::remove(logo_path))
+         {
+             QMessageBox::critical(this, tr(" 错误"), tr("删除原始logo失败，请检查路径是否有写权限或logo被其他软件占用"));
+             return;
+         }else
+         {
+             QFile::copy(le_logo->text(), logo_path);
+         }
+     }
+
+ }
+
+ void OthersPage::copyPreinstall()
+ {
+     QString preinstallPath = le_preinstall->text();
+     if(preinstallPath == "")
+         return;
+     QDir    *dir = new QDir(preinstallPath);
+     QStringList fileList = dir->entryList();
+     if(!dir->exists(Global::srcPath + "/" + Global::devicePath + "/preinstall_data_app"))
+     {
+         dir->mkpath(Global::srcPath + "/" + Global::devicePath + "/preinstall_data_app");
+     }
+     for(int i = 2; i < fileList.length(); i++)
+     {
+         QFile::copy(preinstallPath + "/" + fileList[i], Global::srcPath + "/" + Global::devicePath + "/preinstall_data_app/" + fileList[i].trimmed());
+     }
+ }
+
+ void OthersPage::copySystemApp()
+ {
+     QString systemAppPath = le_system->text();
+     if(systemAppPath == "")
+         return;
+     QDir    *dir = new QDir(systemAppPath);
+     QStringList fileList = dir->entryList();
+     if(!dir->exists(Global::srcPath + "/" + Global::devicePath + "/preinstall_2_system_app"))
+     {
+         dir->mkpath(Global::srcPath + "/" + Global::devicePath + "/preinstall_2_system_app");
+     }
+     for(int i = 2; i < fileList.length(); i++)
+     {
+         QFile::copy(systemAppPath + "/" + fileList[i], Global::srcPath + "/" + Global::devicePath + "/preinstall_2_system_app/" + fileList[i].trimmed());
      }
  }

@@ -42,6 +42,7 @@ private slots:
     void showResult();
     void showState(QProcess::ProcessState);
     void showError();
+    void btn_openWallpaperXml();
   //  void showFinished(QProcess::ExitStatus);
 
 

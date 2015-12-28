@@ -301,6 +301,7 @@ void CommonPage::saveCfg()
         if(!query.exec(strUpdate))
         {
             qDebug() << "update commonpage fail  : db is already open";
+            Global::saveErr.append("update commonpage fail\n");
         }
     }else
     {
@@ -308,7 +309,7 @@ void CommonPage::saveCfg()
         {
             qDebug() << "db path : " + Global::prj_home_path + "/Project/" + Global::prj_name +  "/" + Global::prj_name + ".db";
             qDebug() << "db open fail  :   commonpage::saveCfg()";
-            QMessageBox::warning(this, "Warning", tr("commonpage::数据库打开失败～～"));
+            QMessageBox::warning(this, "Warning", tr("commonpage::数据库打开 失败～～"));
         }else
         {
             QSqlQuery query = QSqlQuery(db);

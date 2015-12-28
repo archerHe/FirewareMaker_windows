@@ -99,6 +99,7 @@ void Wizard::createPrj()
     QDir::setCurrent("Project/" + lePrjName->text());
 
     Global::prj_name = lePrjName->text();
+    Global::saveErr = "";
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", Global::prj_name);
     db.setDatabaseName(lePrjName->text() + ".db");

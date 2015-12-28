@@ -33,7 +33,9 @@ public:
     bool copyDir(const QString &source, const QString &destination, bool override);
     void disableWidget();
     void enableWidget();
-
+    void copyLogo();
+    void copyPreinstall();
+    void copySystemApp();
 public slots:
     void selectWallpaper();
     void loadCfg();
@@ -41,6 +43,9 @@ public slots:
     void selectExtFiles();
     void copyDefWallpaper();
     void copyExtFiles();
+    void selectLogo();
+    void selectPreinstall();
+    void selectSystemApp();
 
 private:
     Ui::OthersPage *ui;
@@ -62,6 +67,12 @@ private:
     QLabel          *lbl_img_logo;
     QLineEdit       *le_logo;
     QPushButton *btn_logo;
+    QLabel           *lbl_preinstall;
+    QLineEdit       *le_preinstall;
+    QPushButton *btn_preinstall;
+    QLabel           *lbl_system;
+    QLineEdit       *le_system;
+    QPushButton *btn_system;
 
     QString         wallpaper_600dp;
     QString         wallpaper_720dp;
