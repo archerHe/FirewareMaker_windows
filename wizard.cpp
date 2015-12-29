@@ -2,8 +2,7 @@
 #include "ui_wizard.h"
 #include "mainwindow.h"
 #include "global.h"
-#include <QtCore>
-#include <QtGui>
+#include <QDebug>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QDir>
@@ -12,6 +11,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QObject>
+#include <QSpacerItem>
 
 
 Wizard::Wizard(QWidget *parent) :
@@ -21,7 +21,9 @@ Wizard::Wizard(QWidget *parent) :
     //ui->setupUi(this);
     prj_home_path = QDir::currentPath();
     initFirstPage();
+    initSecondPage();
     addPage(firstPage);
+    addPage(secondPage);
 
 
 }
@@ -64,10 +66,24 @@ void Wizard::initSecondPage()
 {
     secondPage = new QWizardPage(this);
 
-    QLabel *label = new QLabel("adfafsfddf");
-    QGridLayout *layout = new QGridLayout();
-    layout->addWidget(label,0,0);
-    secondPage->setLayout(layout);
+    lblServerIp = new QLabel("编译服务器ip地址：");
+    leServerIP = new QLineEdit();
+    lblSrcAbsolutePath = new QLabel("服务器源码绝对路径：");
+    leSrcAbsolutePath = new QLineEdit();
+    lblUserName = new QLabel("登录用户名：");
+    leUserName = new QLineEdit();
+    lblPwd  = new QLabel("登录密码：");
+    lePwd  = new QLineEdit();
+    QGridLayout *gridlayout = new QGridLayout();
+    gridlayout->addWidget(lblServerIp, 0, 0);
+    gridlayout->addWidget(leServerIP, 0, 1);
+    gridlayout->addWidget(lblSrcAbsolutePath, 1, 0);
+    gridlayout->addWidget(leSrcAbsolutePath, 1, 1);
+    gridlayout->addWidget(lblUserName, 2, 0);
+    gridlayout->addWidget(leUserName, 2, 1);
+    gridlayout->addWidget(lblPwd, 3, 0);
+    gridlayout->addWidget(lePwd, 3, 1);
+    secondPage->setLayout(gridlayout);
 }
 
 void Wizard::createPrj()
@@ -97,9 +113,12 @@ void Wizard::createPrj()
 
     qDir->mkdir("Project/" + lePrjName->text());
     QDir::setCurrent("Project/" + lePrjName->text());
-
     Global::prj_name = lePrjName->text();
     Global::saveErr = "";
+    Global::serverIp = leServerIP->text();
+    Global::serverUsername = leUserName->text();
+    Global::serverPwd  = lePwd->text();
+    Global::srcAbsolutePath = leSrcAbsolutePath->text();
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", Global::prj_name);
     db.setDatabaseName(lePrjName->text() + ".db");
@@ -192,6 +211,10 @@ void Wizard::createPrj()
     }
     out << "ProjectName=" << lePrjName->text() << endl;
     out << "ProjectPath=" << lePrjPath->text() << endl;
+    out << "ServerIP=" << leServerIP->text() << endl;
+    out << "AndroidAbsolutePath=" << leSrcAbsolutePath->text() << endl;
+    out << "Username=" << leUserName->text() << endl;
+    out << "Password=" << lePwd->text() << endl;
     cfg.close();
     //reset current path
     QDir::setCurrent(Global::prj_home_path);
@@ -228,10 +251,13 @@ void Wizard::accept()
     if(lePrjPath->text() == "" || lePrjName->text() == "")
     {
         QMessageBox::warning(this, tr("错误提示信息"), tr("工程名，路径名不能为空"), QMessageBox::Abort);
-        qDebug() << "prjName srcPath  null";
         return;
     }
-
+    if(leServerIP->text() == "" || leSrcAbsolutePath->text() == "" || leUserName->text() == "" || lePwd->text() == "")
+    {
+        QMessageBox::warning(this, tr("提示信息～～"), tr("服务器地址，android源码绝对路径，用户名，密码，不能为空"));
+        return;
+    }
       createPrj();
       close();
 

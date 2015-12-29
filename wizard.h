@@ -9,6 +9,7 @@
 #include <QPushButton>
 
 
+
 namespace Ui {
 class Wizard;
 }
@@ -26,6 +27,7 @@ public:
 private:
     Ui::Wizard *ui;
 
+    QString prj_home_path;
     QTextBrowser *text;
     QLabel *lblPrjName;
     QLineEdit *lePrjName;
@@ -34,8 +36,16 @@ private:
     QPushButton *choosePrjBtn;
     QWizardPage *firstPage;
     QWizardPage *secondPage;
+    QLabel          *lblServerIp;
+    QLineEdit       *leServerIP;
+    QLabel          *lblSrcAbsolutePath;
+    QLineEdit       *leSrcAbsolutePath;
+    QLabel          *lblUserName;
+    QLineEdit       *leUserName;
+    QLabel          *lblPwd;
+    QLineEdit       *lePwd;
 
-    QString prj_home_path;
+
 
 
 

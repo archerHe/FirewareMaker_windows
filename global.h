@@ -45,5 +45,10 @@ public:
     //linux command on windows
     static QString mingw64;
     static QString saveErr;
+    static QString serverIp;
+    static QString srcAbsolutePath;
+    static QString serverUsername;
+    static QString serverPwd;
+    static QString model;
 };
 #endif

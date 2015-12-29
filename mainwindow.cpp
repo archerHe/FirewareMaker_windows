@@ -90,6 +90,11 @@ void MainWindow::initMainWindow()
     listItemFunction->setText(tr("功能补丁"));
     listItemFunction->setTextAlignment(Qt::AlignHCenter);
 
+    listItemBuild = new QListWidgetItem();
+    listItemBuild->setIcon(QIcon(":/new/img/img/terminal.png"));
+    listItemBuild->setText("Build");
+    listItemBuild->setTextAlignment(Qt::AlignHCenter);
+
     listWidget = new QListWidget();
     listWidget->setFlow(QListView::TopToBottom);
     listWidget->setViewMode(QListView::IconMode);
@@ -97,20 +102,19 @@ void MainWindow::initMainWindow()
     listWidget->setResizeMode(QListView::Adjust);
     listWidget->setMovement(QListView::Static);
     listWidget->setIconSize(QSize(100, 100));
-
-
-
     listWidget->addItem(listItemCommon);
     listWidget->addItem(listItemHardware);
     listWidget->addItem(listItemLauncher);
     listWidget->addItem(listitemOthers);
     listWidget->addItem(listItemFunction);
+    listWidget->addItem(listItemBuild);
     stackedWidget = new QStackedWidget();
     stackedWidget->addWidget(&commonPage);
     stackedWidget->addWidget(&hardwarePage);
     stackedWidget->addWidget(&launcher_page);
     stackedWidget->addWidget(&othersPage);
     stackedWidget->addWidget(&functionPage);
+    stackedWidget->addWidget(&buildPage);
 
     connect(listWidget, SIGNAL(currentRowChanged(int)), stackedWidget, SLOT(setCurrentIndex(int)));
 
@@ -121,9 +125,6 @@ void MainWindow::initMainWindow()
     main_layout->setStretchFactor(listWidget,1);
     main_layout->setStretchFactor(stackedWidget, 7);
     w->setLayout(main_layout);
-
-
-
 }
 
 void MainWindow::settingTEOK()
@@ -152,8 +153,8 @@ void MainWindow::on_actNew_triggered()
     connect(wizard, SIGNAL(finished(int)), &hardwarePage, SLOT(loadCfg()));
     connect(wizard, SIGNAL(finished(int)), &othersPage,  SLOT(loadCfg()));
     connect(wizard, SIGNAL(finished(int)), &launcher_page, SLOT(loadCfg()));
-
     wizard->exec();
+    qDebug() << "......................................................";
 }
 
 void MainWindow::on_actOpen_triggered()
@@ -161,6 +162,10 @@ void MainWindow::on_actOpen_triggered()
     QString prj_open_path = QFileDialog::getOpenFileName(this, "导入现有工程", Global::prj_home_path, "*.prj");
     Global::srcPath = textHelper.readTextStr(prj_open_path, "ProjectPath", "");
     Global::prj_name = textHelper.readTextStr(prj_open_path, "ProjectName", "");
+    Global::serverIp = textHelper.readTextStr(prj_open_path, "ServerIP", "");
+    Global::srcAbsolutePath = textHelper.readTextStr(prj_open_path, "AndroidAbsolutePath", "");
+    Global::serverUsername = textHelper.readTextStr(prj_open_path, "Username", "");
+    Global::serverPwd = textHelper.readTextStr(prj_open_path, "Password", "");
     Global::saveErr = "";
     qDebug() << Global::srcPath << "...." << Global::prj_name;
 #ifdef Q_OS_LINUX
@@ -227,6 +232,10 @@ void MainWindow::on_actClose_triggered()
         hardwarePage.disableWidget();
         Global::srcPath = "";
         Global::prj_name = "";
+        Global::serverIp = "";
+        Global::srcAbsolutePath = "";
+        Global::serverUsername = "";
+        Global::serverPwd = "";
     }
     else if(ret == QMessageBox::No)
     {

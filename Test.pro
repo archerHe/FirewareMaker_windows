@@ -23,7 +23,9 @@ SOURCES += main.cpp\
     hardwarepage.cpp \
     commonpage.cpp \
     functionpage.cpp \
-    otherspage.cpp
+    otherspage.cpp \
+    checkthread.cpp \
+    buildpage.cpp
 
 HEADERS  += mainwindow.h \
     wizard.h \
@@ -33,7 +35,9 @@ HEADERS  += mainwindow.h \
     hardwarepage.h \
     commonpage.h \
     functionpage.h \
-    otherspage.h
+    otherspage.h \
+    checkthread.h \
+    buildpage.h
 
 FORMS    += mainwindow.ui \
     testwidget.ui \
@@ -43,7 +47,8 @@ FORMS    += mainwindow.ui \
     commonpage.ui \
     functionpage.ui \
     otherspage.ui \
-    settingtexteditor.ui
+    settingtexteditor.ui \
+    buildpage.ui
 
 
 

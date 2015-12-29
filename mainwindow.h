@@ -7,6 +7,7 @@
 #include "hardwarepage.h"
 #include "functionpage.h"
 #include "otherspage.h"
+#include "buildpage.h"
 #include <QMainWindow>
 #include <QListWidget>
 #include <QStackedWidget>
@@ -75,6 +76,7 @@ private:
     HardwarePage    hardwarePage;
     FunctionPage    functionPage;
     OthersPage      othersPage;
+    BuildPage           buildPage;
 
     TextHelper textHelper;
 
@@ -86,6 +88,7 @@ private:
     QListWidgetItem *listItemLauncher;
     QListWidgetItem *listItemFunction;
     QListWidgetItem *listitemOthers;
+    QListWidgetItem *listItemBuild;
 
     QString prj_home_path;
     QString textEditorPath;
