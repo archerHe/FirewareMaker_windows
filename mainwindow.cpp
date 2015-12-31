@@ -167,6 +167,7 @@ void MainWindow::on_actOpen_triggered()
     Global::serverUsername = textHelper.readTextStr(prj_open_path, "Username", "");
     Global::serverPwd = textHelper.readTextStr(prj_open_path, "Password", "");
     Global::saveErr = "";
+    Global::wb_repoPath = textHelper.readTextStr(prj_open_path, "RepoPath", "");
     qDebug() << Global::srcPath << "...." << Global::prj_name;
 #ifdef Q_OS_LINUX
     Global::textEditorPath = Global::geditTE;
@@ -236,6 +237,7 @@ void MainWindow::on_actClose_triggered()
         Global::srcAbsolutePath = "";
         Global::serverUsername = "";
         Global::serverPwd = "";
+        Global::wb_repoPath = "";
     }
     else if(ret == QMessageBox::No)
     {

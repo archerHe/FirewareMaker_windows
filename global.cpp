@@ -21,3 +21,4 @@ QString Global::srcAbsolutePath = "";
 QString Global::serverUsername = "";
 QString Global::serverPwd  = "";
 QString Global::model = "";
+QString Global::wb_repoPath = "";

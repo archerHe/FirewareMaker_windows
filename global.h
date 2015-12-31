@@ -49,6 +49,8 @@ public:
     static QString srcAbsolutePath;
     static QString serverUsername;
     static QString serverPwd;
+    static QString wb_repoPath;
     static QString model;
+
 };
 #endif

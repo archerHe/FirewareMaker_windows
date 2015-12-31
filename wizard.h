@@ -44,6 +44,8 @@ private:
     QLineEdit       *leUserName;
     QLabel          *lblPwd;
     QLineEdit       *lePwd;
+    QLabel          *lblRepo;
+    QLineEdit       *leRepo;
 
 
 

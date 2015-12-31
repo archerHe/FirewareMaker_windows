@@ -74,6 +74,8 @@ void Wizard::initSecondPage()
     leUserName = new QLineEdit();
     lblPwd  = new QLabel("登录密码：");
     lePwd  = new QLineEdit();
+    lblRepo = new QLabel("wb_repo.sh 路径:");
+    leRepo = new QLineEdit();
     QGridLayout *gridlayout = new QGridLayout();
     gridlayout->addWidget(lblServerIp, 0, 0);
     gridlayout->addWidget(leServerIP, 0, 1);
@@ -83,6 +85,8 @@ void Wizard::initSecondPage()
     gridlayout->addWidget(leUserName, 2, 1);
     gridlayout->addWidget(lblPwd, 3, 0);
     gridlayout->addWidget(lePwd, 3, 1);
+    gridlayout->addWidget(lblRepo, 4, 0);
+    gridlayout->addWidget(leRepo, 4, 1);
     secondPage->setLayout(gridlayout);
 }
 
@@ -119,6 +123,7 @@ void Wizard::createPrj()
     Global::serverUsername = leUserName->text();
     Global::serverPwd  = lePwd->text();
     Global::srcAbsolutePath = leSrcAbsolutePath->text();
+    Global::wb_repoPath = leRepo->text();
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", Global::prj_name);
     db.setDatabaseName(lePrjName->text() + ".db");
@@ -215,6 +220,7 @@ void Wizard::createPrj()
     out << "AndroidAbsolutePath=" << leSrcAbsolutePath->text() << endl;
     out << "Username=" << leUserName->text() << endl;
     out << "Password=" << lePwd->text() << endl;
+    out << "RepoPath=" << leRepo->text() << endl;
     cfg.close();
     //reset current path
     QDir::setCurrent(Global::prj_home_path);

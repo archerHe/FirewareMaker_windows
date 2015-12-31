@@ -89,6 +89,31 @@ void BuildPage::on_btn_build_clicked()
         QMessageBox::warning(this, tr("错误提示～～"), tr("无法生成命令执行文本，请检查此路径是否有可写权限"));
         return;
     }
+
+    if(ui->ckb_clean->isChecked())
+    {
+        ts << "cd " + Global::srcAbsolutePath + "\n";
+        ts << "wb_repo.sh clean -df\n";
+    }
+
+    if(ui->ckb_checkout->isChecked())
+    {
+         ts << "cd " + Global::srcAbsolutePath + "\n";
+         ts << "wb_repo.sh checkout -f\n";
+    }
+
+    if(ui->ckb_pull->isChecked())
+    {
+        ts << "cd " + Global::srcAbsolutePath + "\n";
+        ts << "wb_repo.sh pull\n";
+    }
+
+    if(ui->ckb_installclean->isChecked())
+    {
+         ts << "cd " + Global::srcAbsolutePath + "\n";
+         ts << "make installclean\n";
+    }
+
    if(ui->ckb_load_prj->isChecked())
    {
        ts << "cd " + Global::srcAbsolutePath + "/wb_project/" + Global::model + "\n";
