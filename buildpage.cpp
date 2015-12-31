@@ -93,19 +93,19 @@ void BuildPage::on_btn_build_clicked()
     if(ui->ckb_clean->isChecked())
     {
         ts << "cd " + Global::srcAbsolutePath + "\n";
-        ts << "wb_repo.sh clean -df\n";
+        ts << Global::wb_repoPath + " clean\n";
     }
 
     if(ui->ckb_checkout->isChecked())
     {
          ts << "cd " + Global::srcAbsolutePath + "\n";
-         ts << "wb_repo.sh checkout -f\n";
+          ts << Global::wb_repoPath + " checkout -f\n";
     }
 
     if(ui->ckb_pull->isChecked())
     {
         ts << "cd " + Global::srcAbsolutePath + "\n";
-        ts << "wb_repo.sh pull\n";
+         ts << Global::wb_repoPath + " pull\n";
     }
 
     if(ui->ckb_installclean->isChecked())

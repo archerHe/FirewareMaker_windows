@@ -38,7 +38,7 @@ public:
 
     void initDir();
     void initMainWindow();
-
+    void closeEvent(QCloseEvent *event);
 public slots:
     void settingTEOK();
     void settingTECancel();

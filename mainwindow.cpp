@@ -127,6 +127,21 @@ void MainWindow::initMainWindow()
     w->setLayout(main_layout);
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    QMessageBox::StandardButton button;
+        button = QMessageBox::question(this, tr("退出程序"),
+            QString(tr("确认退出程序?")),
+            QMessageBox::Yes | QMessageBox::No);
+
+        if (button == QMessageBox::No) {
+            event->ignore();  //忽略退出信号，程序继续运行
+        }
+        else if (button == QMessageBox::Yes) {
+            event->accept();  //接受退出信号，程序退出
+        }
+}
+
 void MainWindow::settingTEOK()
 {
     QLineEdit *le_te = wSettingTE->findChild<QLineEdit *>("le_TE");
