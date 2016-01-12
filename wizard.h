@@ -3,12 +3,12 @@
 
 #include <QWizard>
 #include <QWizardPage>
-#include <QLabel>
-#include <QLineEdit>
 #include <QTextBrowser>
-#include <QPushButton>
 
-
+class QCheckBox;
+class QLabel;
+class QLineEdit;
+class QPushButton;
 
 namespace Ui {
 class Wizard;
@@ -46,7 +46,7 @@ private:
     QLineEdit       *lePwd;
     QLabel          *lblRepo;
     QLineEdit       *leRepo;
-
+    QCheckBox   *ckb_skip_build;
 
 
 
@@ -58,8 +58,8 @@ private:
 
 protected slots:
     void accept();
-
     void on_choosePrjBtn_clicked();
+    void skipBuild();
 
 };
 

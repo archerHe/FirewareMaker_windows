@@ -51,7 +51,7 @@ private slots:
 
     void on_actSetingTE_triggered();
 
-    void on_actSave_triggered();
+  //  void on_actSave_triggered();
 
     void on_actClose_triggered();
 

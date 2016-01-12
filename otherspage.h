@@ -2,19 +2,15 @@
 #define OTHERSPAGE_H
 
 #include <QWidget>
-#include <QLabel>
-#include <QScrollArea>
-#include <QPushButton>
-#include <QGridLayout>
-#include <QVBoxLayout>
-#include <QPixmap>
-#include <QImage>
-#include <QLineEdit>
-#include <QSpacerItem>
-#include <QDebug>
-#include <QFileDialog>
-#include <QDir>
 #include "global.h"
+
+class QLabel;
+class QScrollArea;
+class QPushButton;
+class QGridLayout;
+class QVBoxLayout;
+class QLineEdit;
+class QCheckBox;
 
 namespace Ui {
 class OthersPage;
@@ -46,6 +42,7 @@ public slots:
     void selectLogo();
     void selectPreinstall();
     void selectSystemApp();
+    void enableBatteryLineedit();
 
 private:
     Ui::OthersPage *ui;
@@ -73,6 +70,9 @@ private:
     QLabel           *lbl_system;
     QLineEdit       *le_system;
     QPushButton *btn_system;
+    QLabel           *lbl_battery;
+    QLineEdit       *le_battery;
+    QCheckBox   *ckb_battery;
 
     QString         wallpaper_600dp;
     QString         wallpaper_720dp;

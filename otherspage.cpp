@@ -1,6 +1,19 @@
 #include "otherspage.h"
 #include "ui_otherspage.h"
 #include <QMessageBox>
+#include <QLabel>
+#include <QScrollArea>
+#include <QPushButton>
+#include <QGridLayout>
+#include <QVBoxLayout>
+#include <QPixmap>
+#include <QImage>
+#include <QLineEdit>
+#include <QSpacerItem>
+#include <QDebug>
+#include <QFileDialog>
+#include <QDir>
+#include <QCheckBox>
 
 OthersPage::OthersPage(QWidget *parent) :
     QWidget(parent),
@@ -52,6 +65,10 @@ void OthersPage::initWidget()
     le_system       = new QLineEdit();
     btn_system    = new QPushButton("选择apk拷贝目录");
     connect(btn_system, SIGNAL(clicked()), this, SLOT(selectSystemApp()));
+    lbl_battery = new QLabel("电池参数:");
+    le_battery = new QLineEdit();
+    ckb_battery = new QCheckBox("修改电池参数");
+    connect(ckb_battery, SIGNAL(clicked()), this, SLOT(enableBatteryLineedit()));
 
     QImage img;
     img.load(":/new/img/img/black.png");
@@ -80,7 +97,10 @@ void OthersPage::initWidget()
     gridLayout->addWidget(lbl_system, 6, 0);
     gridLayout->addWidget(le_system, 6, 1, 1, 3);
     gridLayout->addWidget(btn_system, 6, 3);
-    gridLayout->addItem(new QSpacerItem(20,40, QSizePolicy::Expanding, QSizePolicy::Expanding), 7, 0);
+    gridLayout->addWidget(lbl_battery, 7, 0);
+    gridLayout->addWidget(le_battery, 7, 1);
+    gridLayout->addWidget(ckb_battery, 7, 2);
+    gridLayout->addItem(new QSpacerItem(20,40, QSizePolicy::Expanding, QSizePolicy::Expanding), 8, 0);
   //  gridLayout->setSpacing(20);
     vLayout         = new QVBoxLayout(this);
     vLayout->addWidget(scroll);
@@ -226,6 +246,19 @@ void OthersPage::selectSystemApp()
     le_system->setText(systemAppPath);
 }
 
+void OthersPage::enableBatteryLineedit()
+{
+    if(ckb_battery->isChecked())
+    {
+        lbl_battery->setEnabled(true);
+        le_battery->setEnabled(true);
+    }else
+    {
+        lbl_battery->setDisabled(true);
+        le_battery->setDisabled(true);
+    }
+}
+
  bool OthersPage::copyDir(const QString &source, const QString &destination, bool override)
  {
      QDir directory(source);
@@ -291,6 +324,7 @@ void OthersPage::selectSystemApp()
          QWidget *w = qobject_cast<QWidget *>(list.at(i));
          w->setEnabled(true);
      }
+     le_battery->setDisabled(true);
  }
 
  void OthersPage::copyLogo()

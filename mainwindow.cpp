@@ -20,6 +20,7 @@
 #include <QComboBox>
 #include <QTextStream>
 #include <QDebug>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -118,12 +119,11 @@ void MainWindow::initMainWindow()
 
     connect(listWidget, SIGNAL(currentRowChanged(int)), stackedWidget, SLOT(setCurrentIndex(int)));
 
-
     QHBoxLayout *main_layout = new QHBoxLayout();
     main_layout->addWidget(listWidget);
     main_layout->addWidget(stackedWidget);
     main_layout->setStretchFactor(listWidget,1);
-    main_layout->setStretchFactor(stackedWidget, 7);
+    main_layout->setStretchFactor(stackedWidget, 5);
     w->setLayout(main_layout);
 }
 
@@ -169,7 +169,6 @@ void MainWindow::on_actNew_triggered()
     connect(wizard, SIGNAL(finished(int)), &othersPage,  SLOT(loadCfg()));
     connect(wizard, SIGNAL(finished(int)), &launcher_page, SLOT(loadCfg()));
     wizard->exec();
-    qDebug() << "......................................................";
 }
 
 void MainWindow::on_actOpen_triggered()
@@ -183,10 +182,14 @@ void MainWindow::on_actOpen_triggered()
     Global::serverPwd = textHelper.readTextStr(prj_open_path, "Password", "");
     Global::saveErr = "";
     Global::wb_repoPath = textHelper.readTextStr(prj_open_path, "RepoPath", "");
+    if(textHelper.readTextStr(prj_open_path, "FlagSkipBuild", "") == "false")
+    {
+        Global::flagSkipBuild = false;
+    }else
+    {
+        Global::flagSkipBuild = true;
+    }
     qDebug() << Global::srcPath << "...." << Global::prj_name;
-#ifdef Q_OS_LINUX
-    Global::textEditorPath = Global::geditTE;
-#endif
     Global::textEditorPath = Global::notepad2TE;
     commonPage.loadCfg();
     hardwarePage.loadCfg();
@@ -230,7 +233,7 @@ void MainWindow::on_actSetingTE_triggered()
     //file.close();
     //wSettingTE->showNormal();
 }
-
+/*
 void MainWindow::on_actSave_triggered()
 {
     commonPage.saveCfg();
@@ -238,14 +241,17 @@ void MainWindow::on_actSave_triggered()
 //    launcher_page.saveCfg();
     othersPage.saveCfg();
 }
-
+*/
 void MainWindow::on_actClose_triggered()
 {
-    int ret = QMessageBox::information(this, tr("关闭工程"), tr("是否要关闭当前工程，当前修改选项不会保存"), QMessageBox::Yes, QMessageBox::No);
+    int ret = QMessageBox::information(this, tr("关闭工程"), tr("是否要关闭当前工程??"), QMessageBox::Yes, QMessageBox::No);
     if(ret == QMessageBox::Yes)
     {
         commonPage.disableWidget();
         hardwarePage.disableWidget();
+        launcher_page.disableWidget();
+        othersPage.disableWidget();
+        functionPage.disableWidget();
         Global::srcPath = "";
         Global::prj_name = "";
         Global::serverIp = "";
@@ -253,6 +259,7 @@ void MainWindow::on_actClose_triggered()
         Global::serverUsername = "";
         Global::serverPwd = "";
         Global::wb_repoPath = "";
+        Global::flagSkipBuild = false;
     }
     else if(ret == QMessageBox::No)
     {
@@ -302,9 +309,12 @@ void MainWindow::on_actReload_triggered()
         break;
     case 2:
         launcher_page.loadCfg();
+        break;
     case 3:
         othersPage.loadCfg();
         break;
+    case 4:
+        functionPage.saveCfg();
     default:
         QMessageBox::information(this, "information", tr("此页面不支持刷新"));
         break;
@@ -328,10 +338,15 @@ void MainWindow::on_actApplyPage_triggered()
         break;
     case 2:
         launcher_page.saveCfg();
+        break;
     case 3:
         othersPage.saveCfg();
         break;
+    case 4:
+        functionPage.saveCfg();
+        break;
     default:
+         QMessageBox::information(this, "information", tr("此页面不支持刷新"));
         break;
     }
 }

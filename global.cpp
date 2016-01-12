@@ -22,3 +22,4 @@ QString Global::serverUsername = "";
 QString Global::serverPwd  = "";
 QString Global::model = "";
 QString Global::wb_repoPath = "";
+bool Global::flagSkipBuild = false;

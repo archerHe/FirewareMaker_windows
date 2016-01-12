@@ -156,6 +156,14 @@ void BuildPage::on_btn_build_clicked()
         {
             ts << "make -j" << ui->le_thread_num->text();
         }
+        if(ui->ckb_fls->text() == "")
+        {
+            ts << "./mkimage.sh SF_3GR-tablet.dtb\n";
+        }
+        if(ui->ckb_ota->text() == "")
+        {
+            ts << "./mkimage.sh SF_3GR-tablet.dtb ota\n";
+        }
 
         f->close();
     }

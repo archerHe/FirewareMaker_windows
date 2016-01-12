@@ -1,5 +1,17 @@
 #include "hardwarepage.h"
 #include "ui_hardwarepage.h"
+#include <QLabel>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QComboBox>
+#include <QDebug>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QGridLayout>
+#include <QScrollArea>
+#include <QSpacerItem>
+#include <QSqlDatabase>
+#include <QSqlQuery>
 
 HardwarePage::HardwarePage(QWidget *parent) :
     QWidget(parent),
@@ -35,6 +47,10 @@ void HardwarePage::initWidget()
     lbl_front_cam = new QLabel("前置摄像头:");
     lbl_sim_num  = new QLabel("Sim卡");
     lbl_ddr_fre = new QLabel("DDR频率:");
+    lbl_band    = new QLabel("3G频段");
+    lbl_band->setToolTip("band1  2100\nband2  1900\nband5  850\nband8  900");
+    lbl_battery = new QLabel("电池参数");
+
 
     cb_screen = new QComboBox();
     cb_screen->addItem("TN");
@@ -62,6 +78,14 @@ void HardwarePage::initWidget()
     cb_ddr_fre->addItem("312");
     cb_ddr_fre->addItem("400");
     cb_ddr_fre->addItem("455");
+    cb_band = new QComboBox();
+    QStringList bandList;
+    bandList << "band18_1530" << "band1_1530" << "band15_1530" << "band25_1530" << "band125_1530"
+             << "band128_1530" << "band158_1530" << "band258_1530" << "band1258_1530" << "band1_GSM900-DCS1800_1530";
+    cb_band->addItems(bandList);
+
+    le_battery = new QLineEdit();
+    le_battery->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     gridLayout->addWidget(lbl_screen, 0, 0);
     gridLayout->addWidget(cb_screen, 0, 1);
@@ -74,16 +98,22 @@ void HardwarePage::initWidget()
     gridLayout->addWidget(cb_front_cam, 3, 1);
     gridLayout->addWidget(lbl_sim_num, 4, 0);
     gridLayout->addWidget(cb_sim_num, 4, 1);
-    gridLayout->addItem(vSpacer,  5, 0);
+    gridLayout->addWidget(lbl_band, 5, 0);
+    gridLayout->addWidget(cb_band, 5, 1);
+    gridLayout->addWidget(lbl_battery, 6, 0);
+    gridLayout->addWidget(le_battery, 6, 1);
+    gridLayout->addItem(vSpacer,  7, 0);
     gridLayout->setSpacing(15);
 
-    vLayout = new QVBoxLayout();
-
+    vLayout = new QVBoxLayout(this);
     vLayout->addWidget(scrollArea);
 
-    setLayout(vLayout);
-
-
+/*
+    QHBoxLayout *hLayout = new QHBoxLayout();
+    hLayout->addWidget(lbl_battery);
+    hLayout->addWidget(le_battery);
+    vLayout->addLayout(hLayout);
+    */
 }
 
 void HardwarePage::disableWidget()
@@ -119,6 +149,7 @@ void HardwarePage::loadCfg()
     QString dtsCfg = Global::srcPath + "/" + Global::dtsPath;
     QString kernelCfg = Global::srcPath + "/" + Global::kernelCfgPath;
 
+    //dts文件里gc0310项少了status一项
     textHelper.addState2Gc0310Dts(dtsCfg);
 
     preBackCamId    = textHelper.readCam("back", dtsCfg);
@@ -147,13 +178,55 @@ void HardwarePage::loadCfg()
         cb_sim_num->setCurrentIndex(1);
     }
 
-    QString strScreenType = textHelper.readTextStr(kernelCfg, "USE_IPS_LCD=y", "kernelCfg");
+    QString strScreenType = textHelper.readTextStr(kernelCfg, "CONFIG_USE_IPS_LCD=y", "kernelCfg");
     if(strScreenType == "IPS")
     {
         cb_screen->setCurrentIndex(1);
     }else
     {
         cb_screen->setCurrentIndex(0);
+    }
+
+    QString strBand = textHelper.readTextStr(boardCfg, "BAND_FEID", "boardCfg");
+    if(strBand == "weibu_band18_1530")
+    {
+        cb_band->setCurrentIndex(0);
+    }else if(strBand == "weibu_band1_1530")
+    {
+        cb_band->setCurrentIndex(1);
+    }else if(strBand == "weibu_band15_1530")
+    {
+        cb_band->setCurrentIndex(2);
+    }else if(strBand == "weibu_band25_1530")
+    {
+        cb_band->setCurrentIndex(3);
+    }else if(strBand == "weibu_band125_1530")
+    {
+        cb_band->setCurrentIndex(4);
+    }else if(strBand == "weibu_band128_1530")
+    {
+        cb_band->setCurrentIndex(5);
+    }else if(strBand == "weibu_band158_1530")
+    {
+        cb_band->setCurrentIndex(6);
+    }else if(strBand == "weibu_band258_1530")
+    {
+        cb_band->setCurrentIndex(7);
+    }else if(strBand == "weibu_band1258_1530")
+    {
+        cb_band->setCurrentIndex(8);
+    }else if(strBand == "weibu_band1_GSM900-DCS1800_1530")
+    {
+        cb_band->setCurrentIndex(9);
+    }
+
+    QString flash = textHelper.readTextStr(dtsCfg, "&emmc ", "flash");
+    if(flash == "\"disabled\";")
+    {
+        cb_flash->setCurrentIndex(0);
+    }else
+    {
+        cb_flash->setCurrentIndex(1);
     }
 }
 
@@ -169,17 +242,29 @@ void HardwarePage::saveCfg()
         textHelper.writeToText(boardCfg, "BUILD_DSDS", "true", ":=");
     }else
     {
-        qDebug() << "BUILD_DSDS:=false";
         textHelper.writeToText(boardCfg, "BUILD_DSDS", "false", ":=");
     }
-    if(cb_screen->currentIndex() == 0)
+/*
+ * 读取emmc的status值作为判断，写入时，隔5行写emmc的status值，再隔7行写nand的status值，如果以后这部分结构改变可能导致读取写入失败
+ *
+ */
+    if(cb_flash->currentIndex() == 0)
     {
-        textHelper.writeToText(kernelCfg, "#USE_IPS_LCD", "n", "=" );
+        textHelper.writeToText(dtsCfg, "&emmc ", "disabled", "&emmc ");
     }else
     {
-        qDebug() << "USE_IPS_LCD=y";
-        textHelper.writeToText(kernelCfg, "USE_IPS_LCD", "y", "=" );
+        textHelper.writeToText(dtsCfg, "&emmc ", "okay", "&emmc ");
     }
+
+    if(cb_screen->currentIndex() == 0)
+    {
+        textHelper.writeToText(kernelCfg, "CONFIG_USE_IPS_LCD", "n", "=" );
+    }else
+    {
+        textHelper.writeToText(kernelCfg, "CONFIG_USE_IPS_LCD", "y", "=" );
+    }
+
+    textHelper.addState2Gc0310Dts(dtsCfg);
 
     textHelper.writeCam(preBackCamId, cb_back_cam->currentIndex(), dtsCfg);
     textHelper.writeCam(preFrontCamId + 6, cb_front_cam->currentIndex() + 6, dtsCfg);

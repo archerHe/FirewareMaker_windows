@@ -51,6 +51,7 @@ public:
     static QString serverPwd;
     static QString wb_repoPath;
     static QString model;
+    static bool flagSkipBuild;
 
 };
 #endif

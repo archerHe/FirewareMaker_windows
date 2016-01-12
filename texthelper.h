@@ -28,6 +28,7 @@ public:
     bool    writeToText(QString filePath, QString str, QString value, QString split);
     bool    addWallpaperXml(QString filePath, QString newLine);
     bool    addState2Gc0310Dts(QString dtsPath);
+    QStringList readBatteryPar();
 
 private:
     QString oriText;

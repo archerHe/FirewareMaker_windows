@@ -2,19 +2,16 @@
 #define COMMONPAGE_H
 
 #include <QWidget>
-#include <QGridLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QScrollArea>
-#include <QComboBox>
-#include <QPushButton>
-#include <QSpacerItem>
-#include <QSqlDatabase>
-#include <QSqlQuery>
-#include <QProcess>
 #include "texthelper.h"
 #include "global.h"
 #include "wizard.h"
+
+class QLabel;
+class QPushButton;
+class QLineEdit;
+class QComboBox;
+class QSpacerItem;
+class QScrollArea;
 
 namespace Ui {
 class CommonPage;

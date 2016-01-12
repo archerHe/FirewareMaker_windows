@@ -62,7 +62,6 @@
     <addaction name="actNew"/>
     <addaction name="actOpen"/>
     <addaction name="actClose"/>
-    <addaction name="actSave"/>
     <addaction name="actExit"/>
    </widget>
    <widget class="QMenu" name="menu_2">

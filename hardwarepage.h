@@ -4,21 +4,20 @@
 #include <QWidget>
 #include <QtGui>
 #include <QtCore>
-#include <QLabel>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QComboBox>
-#include <QDebug>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QGridLayout>
-#include <QScrollArea>
-#include <QSpacerItem>
-#include <QSqlDatabase>
-#include <QSqlQuery>
 #include "global.h"
 #include "texthelper.h"
 #include "wizard.h"
+
+class QLabel;
+class QPushButton;
+class QLineEdit;
+class QComboBox;
+class QVBoxLayout;
+class QHBoxLayout;
+class QGridLayout;
+class QSpacerItem;
+class QScrollArea;
+
 
 namespace Ui {
 class HardwarePage;
@@ -56,6 +55,8 @@ private:
     QLabel *lbl_front_cam;
     QLabel *lbl_sim_num;
     QLabel *lbl_ddr_fre;
+    QLabel *lbl_band;
+    QLabel *lbl_battery;
 
     QComboBox *cb_screen;
     QComboBox *cb_flash;
@@ -63,6 +64,8 @@ private:
     QComboBox *cb_front_cam;
     QComboBox *cb_sim_num;
     QComboBox *cb_ddr_fre;
+    QComboBox *cb_band;
+    QLineEdit       *le_battery;
 
     QHBoxLayout *hLayout;
     QVBoxLayout *vLayout;

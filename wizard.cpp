@@ -2,6 +2,9 @@
 #include "ui_wizard.h"
 #include "mainwindow.h"
 #include "global.h"
+#include <QLabel>
+#include <QPushButton>
+#include <QLineEdit>
 #include <QDebug>
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -12,7 +15,9 @@
 #include <QSqlQuery>
 #include <QObject>
 #include <QSpacerItem>
-
+#include <QCheckBox>
+#include <QSettings>
+#include <QCompleter>
 
 Wizard::Wizard(QWidget *parent) :
     QWizard(parent),
@@ -24,8 +29,6 @@ Wizard::Wizard(QWidget *parent) :
     initSecondPage();
     addPage(firstPage);
     addPage(secondPage);
-
-
 }
 
 Wizard::~Wizard()
@@ -46,7 +49,6 @@ void Wizard::initFirstPage()
     hBoxLayout->addWidget(lePrjPath);
     hBoxLayout->addWidget(choosePrjBtn);
 
-
     lblPrjName->setText(tr("工程名"));
     lblPrjPath->setText(tr("Android工程路径"));
 
@@ -59,7 +61,7 @@ void Wizard::initFirstPage()
 }
 
 /*
- *暂没用第二页导航
+ *第二页导航
  *
 */
 void Wizard::initSecondPage()
@@ -76,17 +78,20 @@ void Wizard::initSecondPage()
     lePwd  = new QLineEdit();
     lblRepo = new QLabel("wb_repo.sh 路径:");
     leRepo = new QLineEdit();
+    ckb_skip_build = new QCheckBox("跳过输入此页");
+    connect(ckb_skip_build, SIGNAL(clicked()), this, SLOT(skipBuild()));
     QGridLayout *gridlayout = new QGridLayout();
-    gridlayout->addWidget(lblServerIp, 0, 0);
-    gridlayout->addWidget(leServerIP, 0, 1);
-    gridlayout->addWidget(lblSrcAbsolutePath, 1, 0);
-    gridlayout->addWidget(leSrcAbsolutePath, 1, 1);
-    gridlayout->addWidget(lblUserName, 2, 0);
-    gridlayout->addWidget(leUserName, 2, 1);
-    gridlayout->addWidget(lblPwd, 3, 0);
-    gridlayout->addWidget(lePwd, 3, 1);
-    gridlayout->addWidget(lblRepo, 4, 0);
-    gridlayout->addWidget(leRepo, 4, 1);
+    gridlayout->addWidget(ckb_skip_build, 0, 0);
+    gridlayout->addWidget(lblServerIp, 1, 0);
+    gridlayout->addWidget(leServerIP, 1, 1);
+    gridlayout->addWidget(lblSrcAbsolutePath, 2, 0);
+    gridlayout->addWidget(leSrcAbsolutePath, 2, 1);
+    gridlayout->addWidget(lblUserName, 3, 0);
+    gridlayout->addWidget(leUserName, 3, 1);
+    gridlayout->addWidget(lblPwd, 4, 0);
+    gridlayout->addWidget(lePwd, 4, 1);
+    gridlayout->addWidget(lblRepo, 5, 0);
+    gridlayout->addWidget(leRepo, 5, 1);
     secondPage->setLayout(gridlayout);
 }
 
@@ -221,6 +226,13 @@ void Wizard::createPrj()
     out << "Username=" << leUserName->text() << endl;
     out << "Password=" << lePwd->text() << endl;
     out << "RepoPath=" << leRepo->text() << endl;
+    if(Global::flagSkipBuild == false)
+    {
+        out << "FlagSkipBuild=" << "false" << endl;
+    }else
+    {
+        out << "FlagSkipBuild=" << "true" << endl;
+    }
     cfg.close();
     //reset current path
     QDir::setCurrent(Global::prj_home_path);
@@ -251,6 +263,28 @@ void Wizard::on_choosePrjBtn_clicked()
     lePrjPath->setText(dirName);
 }
 
+void Wizard::skipBuild()
+{
+    if(ckb_skip_build->isChecked())
+    {
+        leServerIP->setDisabled(true);
+        leSrcAbsolutePath->setDisabled(true);
+        leUserName->setDisabled(true);
+        lePwd->setDisabled(true);
+        leRepo->setDisabled(true);
+        Global::flagSkipBuild = true;
+    }else
+    {
+        leServerIP->setEnabled(true);
+        leSrcAbsolutePath->setEnabled(true);
+        leUserName->setEnabled(true);
+        lePwd->setEnabled(true);
+        leRepo->setEnabled(true);
+        Global::flagSkipBuild = false;
+    }
+
+}
+
 void Wizard::accept()
 {
 
@@ -259,10 +293,13 @@ void Wizard::accept()
         QMessageBox::warning(this, tr("错误提示信息"), tr("工程名，路径名不能为空"), QMessageBox::Abort);
         return;
     }
-    if(leServerIP->text() == "" || leSrcAbsolutePath->text() == "" || leUserName->text() == "" || lePwd->text() == "")
+    if(Global::flagSkipBuild == false)
     {
-        QMessageBox::warning(this, tr("提示信息～～"), tr("服务器地址，android源码绝对路径，用户名，密码，不能为空"));
-        return;
+        if(leServerIP->text() == "" || leSrcAbsolutePath->text() == "" || leUserName->text() == "" || lePwd->text() == "")
+        {
+            QMessageBox::warning(this, tr("提示信息～～"), tr("服务器地址，android源码绝对路径，用户名，密码，不能为空"));
+            return;
+        }
     }
       createPrj();
       close();

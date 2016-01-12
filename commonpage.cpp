@@ -1,6 +1,15 @@
 #include "commonpage.h"
 #include "ui_commonpage.h"
-
+#include <QGridLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QScrollArea>
+#include <QComboBox>
+#include <QPushButton>
+#include <QSpacerItem>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QProcess>
 
 CommonPage::CommonPage(QWidget *parent) :
     QWidget(parent),

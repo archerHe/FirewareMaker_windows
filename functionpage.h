@@ -13,6 +13,9 @@
 #include <QVBoxLayout>
 #include <QScrollArea>
 #include <QCheckBox>
+#include <QDir>
+#include <QFile>
+#include "global.h"
 
 namespace Ui {
 class FunctionPage;
@@ -32,17 +35,22 @@ public:
 
 public slots:
     void loadCfg();
-    void app2sd_apply();
-    void app2sd_undo();
+    void saveCfg();
+    void readErr();
+    void readStdOut();
 private:
     Ui::FunctionPage *ui;
     QScrollArea     *scrollArea;
     QWidget         *functionpage_scrollWidget;
     QGridLayout     *gridLayout;
     QVBoxLayout     *vLayout;
+    QProcess            *p;
+    QFile                  *prjFile;
+
     QCheckBox       *cb_app2sd;
-    QPushButton     *btn_apply_app2sd;
-    QPushButton     *btn_undo_app2sd;
+    QCheckBox       *cb_ptest;
+    QCheckBox       *cb_speak;
+
 
 
 };

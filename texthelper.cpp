@@ -40,10 +40,14 @@ QString TextHelper::readTextStr(QString filePath, QString objStr, QString typeFl
                 if(typeFlag == "xml")
                 {
                     resultStr = readXml(objLine);
-               //     qDebug() <<  "objStr:" << objStr << "result:" << resultStr;
                     break;
                 }else if(typeFlag == "boardCfg")
                 {
+                    if(objStr == "BAND_FEID")
+                    {
+                        if(objLine.at(0) == '#')
+                            continue;
+                    }
                     QStringList strlist = objLine.split(":=");
                     resultStr = strlist[1];
                     break;
@@ -51,6 +55,14 @@ QString TextHelper::readTextStr(QString filePath, QString objStr, QString typeFl
                 {
                     file.close();
                     return "IPS";
+                }else if(typeFlag == "flash")
+                {
+                    objLine = stream.readLine();
+                    objLine = stream.readLine();
+                    objLine = stream.readLine();
+                    objLine = stream.readLine();
+                    objLine = stream.readLine();
+                    objLine = stream.readLine();
                 }
                 QStringList strlist = objLine.split("=");
                 resultStr = strlist[1];
@@ -59,7 +71,6 @@ QString TextHelper::readTextStr(QString filePath, QString objStr, QString typeFl
         }
     }
     file.close();
-//    qDebug() << objStr << " : " << resultStr;
     return resultStr.trimmed();
 }
 
@@ -319,8 +330,8 @@ bool TextHelper::writeToText(QString filePath, QString str, QString value, QStri
     }
     if(!tempFile->open(QIODevice::WriteOnly))
     {
-        qDebug() << "tempFile return false";
-        Global::saveErr.append(QDir::currentPath() + "/tmp/temp.txt   open fail\n");
+        qDebug() << filePath << ": tempFile open fail";
+        Global::saveErr.append(QDir::currentPath() + "/tmp/temp.txt open fail\n");
         oriFile->close();
         return false;
     }
@@ -334,8 +345,41 @@ bool TextHelper::writeToText(QString filePath, QString str, QString value, QStri
                 tempTS << "export " << str << " := " << value << "\n";
                 continue;
             }
+            if(split == "&emmc ")
+            {
+                tempTS << strLine << "\n";
+                for(int i = 0; i < 5; i++)
+                {
+                    strLine = oriTS.readLine();
+                    tempTS << strLine << "\n";
+                }
+                strLine = oriTS.readLine();
+                if(value == "disabled")
+                {
+                    tempTS << "  status = \"disabled\";\n";
+                    for(int i = 0; i < 7; i++)
+                    {
+                        strLine = oriTS.readLine();
+                        tempTS << strLine << "\n";
+                    }
+                    tempTS << "  status = \"okay\";\n";
+                    strLine = oriTS.readLine();
+                    continue;
+                }else
+                {
+                    tempTS << "  status = \"okay\";\n";
+                    for(int i = 0; i < 7; i++)
+                    {
+                        strLine = oriTS.readLine();
+                        tempTS << strLine << "\n";
+                    }
+                    tempTS << "  status = \"disabled\";\n";
+                    strLine = oriTS.readLine();
+                    continue;
+                }
+            }
             tempTS << str << split << value << "\n";
-  //          qDebug() << "tempTS: " << str << split << value;
+//            qDebug() << "tempTS: " << str << split << value;
             continue;
         }
         tempTS << strLine << "\n";
@@ -503,6 +547,24 @@ bool TextHelper::addState2Gc0310Dts(QString dtsPath)
         return false;
     }
     return true;
+}
+
+QStringList TextHelper::readBatteryPar()
+{
+    QFile *dtsFile = new QFile(Global::srcPath + "/" + Global::dtsPath);
+    if(!dtsFile->open(QIODevice::ReadOnly))
+    {
+        return NULL;
+    }
+    QString strLine;
+    while(!dtsFile->atEnd())
+    {
+        strLine = dtsFile->readLine();
+        if(strLine.contains("battery {"))
+        {
+asdfsf
+        }
+    }
 }
 
 
