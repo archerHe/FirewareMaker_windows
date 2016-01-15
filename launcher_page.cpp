@@ -160,6 +160,7 @@ void Launcher_page::saveCfg()
         return;
     }
     cpWallpaper(le_wallpaper->text());
+    QMessageBox::information(this, tr("Info"), tr("此页面选项修改完毕"));
 }
 
 void Launcher_page::btn_wallpaper_choose()
@@ -173,7 +174,9 @@ void Launcher_page::btn_wallpaper_choose()
     QString wallpaperPath = fileDlg->getExistingDirectory(this);
     le_wallpaper->setText(wallpaperPath);
 }
-
+/*
+ * 判断overlay下是否有
+ */
 void Launcher_page::btnOpenWallpaperDir()
 {
     if(Global::srcPath == "")
@@ -182,12 +185,12 @@ void Launcher_page::btnOpenWallpaperDir()
         return;
     }
     QDir *dir = new QDir();
-    if(!dir->exists(Global::srcPath + "/" + Global::devicePath + "/packages/apps/Launcher3/res/drawable-sw600dp-nodpi"))
-    {
-        QDesktopServices::openUrl(QUrl(Global::srcPath + "/packages/apps/Launcher3/res/drawable-sw600dp-nodpi", QUrl::TolerantMode));
-    }else
+    if(!dir->exists(Global::srcPath + "/" + Global::devicePath + "/overlay_aosp/packages/apps/Launcher3/res/drawable-sw600dp-nodpi"))
     {
         QDesktopServices::openUrl(QUrl(Global::srcPath + "/" + Global::devicePath + "/overlay_aosp/packages/apps/Launcher3/res/drawable-sw600dp-nodpi", QUrl::TolerantMode));
+    }else
+    {
+        QDesktopServices::openUrl(QUrl(Global::srcPath + "/packages/apps/Launcher3/res/drawable-sw600dp-nodpi", QUrl::TolerantMode));
     }
 }
 

@@ -1,5 +1,6 @@
 #include "otherspage.h"
 #include "ui_otherspage.h"
+#include "texthelper.h"
 #include <QMessageBox>
 #include <QLabel>
 #include <QScrollArea>
@@ -98,8 +99,8 @@ void OthersPage::initWidget()
     gridLayout->addWidget(le_system, 6, 1, 1, 3);
     gridLayout->addWidget(btn_system, 6, 3);
     gridLayout->addWidget(lbl_battery, 7, 0);
-    gridLayout->addWidget(le_battery, 7, 1);
-    gridLayout->addWidget(ckb_battery, 7, 2);
+    gridLayout->addWidget(le_battery, 7, 1, 1, 2);
+    gridLayout->addWidget(ckb_battery, 7, 3);
     gridLayout->addItem(new QSpacerItem(20,40, QSizePolicy::Expanding, QSizePolicy::Expanding), 8, 0);
   //  gridLayout->setSpacing(20);
     vLayout         = new QVBoxLayout(this);
@@ -153,6 +154,15 @@ void OthersPage::loadCfg()
         QImage res = img.scaled(200,200);
         lbl_img_logo->setPixmap(QPixmap::fromImage(res));
     }
+    TextHelper textHelper;
+    QString strBattery = textHelper.readBatteryPar();
+    if(strBattery.isEmpty())
+    {
+        QMessageBox::warning(this, tr("警告～～"), tr("电池参数读取错误，请检查dts里电池参数格式是否正确。。"));
+    }else
+    {
+        le_battery->setText(strBattery);
+    }
 }
 
 void OthersPage::saveCfg()
@@ -162,6 +172,8 @@ void OthersPage::saveCfg()
     copyLogo();
     copyPreinstall();
     copySystemApp();
+    writeBatterypar(le_battery->text());
+    QMessageBox::information(this, tr("Info"), tr("此页面选项修改完毕"));
 }
 
 void OthersPage::selectExtFiles()
@@ -199,7 +211,7 @@ void OthersPage::copyExtFiles()
 {
     if(le_extFiles->text() == "")
     {
-        qDebug() << "le_extFils =";
+        qDebug() << "no extFiles need to copy";
         return;
     }
     QDir *extDir = new QDir(le_extFiles->text());
@@ -382,5 +394,20 @@ void OthersPage::enableBatteryLineedit()
      for(int i = 2; i < fileList.length(); i++)
      {
          QFile::copy(systemAppPath + "/" + fileList[i], Global::srcPath + "/" + Global::devicePath + "/preinstall_2_system_app/" + fileList[i].trimmed());
+     }
+ }
+
+ void OthersPage::writeBatterypar(QString batteryPar)
+ {
+     QStringList strList= batteryPar.trimmed().split(" ");
+     if(strList.length() != 21)
+     {
+         QMessageBox::warning(this, "警告！！", "电池参数个数不对，应为21个");
+         return;
+     }
+     TextHelper textHelper;
+     if(!textHelper.writeBatteryPar(batteryPar))
+     {
+         QMessageBox::critical(this, "错误！！", "电池参数写入失败");
      }
  }

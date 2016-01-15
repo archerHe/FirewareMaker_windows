@@ -26,7 +26,7 @@ bool TextHelper::modifyTextStr(QString filePath, QString oriStr, QString newStr)
 */
 QString TextHelper::readTextStr(QString filePath, QString objStr, QString typeFlag)
 {
-    QString resultStr = NULL;
+    QString resultStr = "";
     QFile file(filePath);
     if(file.open(QIODevice::ReadOnly))
     {
@@ -211,6 +211,7 @@ int TextHelper::readCam(QString camType, QString dtsPath)
 
     }
     dtsFile->close();
+    return -1;
 }
 
 void TextHelper::writeCam(int preCamId, int curCamId, QString dtsPath)
@@ -549,12 +550,14 @@ bool TextHelper::addState2Gc0310Dts(QString dtsPath)
     return true;
 }
 
-QStringList TextHelper::readBatteryPar()
+QString TextHelper::readBatteryPar()
 {
+    QStringList strList;
+    QString strBattery;
     QFile *dtsFile = new QFile(Global::srcPath + "/" + Global::dtsPath);
     if(!dtsFile->open(QIODevice::ReadOnly))
     {
-        return NULL;
+        return strBattery;
     }
     QString strLine;
     while(!dtsFile->atEnd())
@@ -562,9 +565,146 @@ QStringList TextHelper::readBatteryPar()
         strLine = dtsFile->readLine();
         if(strLine.contains("battery {"))
         {
-asdfsf
+            strLine = dtsFile->readLine();
+            strLine = dtsFile->readLine();
+            QStringList strList1 = strLine.split("<");
+            strList << strList1[1].trimmed();
+            strList << dtsFile->readLine().trimmed();
+            QString str2 = dtsFile->readLine();
+            QStringList strList2 = str2.split(">");
+            strList << strList2[0].trimmed();
+            strBattery = strList[0] + " " + strList[1] + " " + strList[2];
+            dtsFile->close();
+            return strBattery;
         }
     }
+    dtsFile->close();
+    return strBattery;
+}
+
+bool TextHelper::writeBatteryPar(QString batteryPar)
+{
+    QFile *dtsFile = new QFile(Global::srcPath + "/" + Global::dtsPath);
+    QFile *tempFile = new QFile(QDir::currentPath() + "/tmp/temp.txt");
+    QTextStream dtsTS(dtsFile);
+    QTextStream tempTS(tempFile);
+    if(!dtsFile->open(QIODevice::ReadOnly))
+    {
+        qDebug() << Global::srcPath + "/" + Global::dtsPath << " open fail";
+        return false;
+    }
+    if(!tempFile->open(QIODevice::WriteOnly))
+    {
+        qDebug() << QDir::currentPath() + "/tmp/temp.txt" << " open fail";
+        dtsFile->close();
+        return false;
+    }
+    QString strLine;
+    while (!dtsTS.atEnd())
+    {
+        strLine = dtsTS.readLine();
+        if(strLine.contains("battery {"))
+        {
+            tempTS << strLine << "\n";
+            strLine = dtsTS.readLine();
+            tempTS << strLine << "\n";
+            tempTS << "      ocv_table = <";
+            QStringList strList = batteryPar.trimmed().split(" ");
+            for(int i = 1; i < 21; i++)
+            {
+                tempTS << strList[i -1] << " ";
+                if(i%7 == 0)
+                {
+                    tempTS << "\n\t\t\t";
+                }
+            }
+            tempTS << strList[20];
+            tempTS << ">;\n";
+            dtsTS.readLine();
+            dtsTS.readLine();
+            dtsTS.readLine();
+            continue;
+        }
+        tempTS << strLine << "\n";
+    }
+    dtsFile->close();
+    tempFile->flush();
+    tempFile->close();
+    if(!dtsFile->remove())
+    {
+        qDebug() << "dtsFile remove fail";
+        return false;
+    }
+    if(!tempFile->copy(Global::srcPath + "/" + Global::dtsPath))
+    {
+        qDebug() << "copy fail" << Global::srcPath + "/" + Global::dtsPath;
+        return false;
+    }
+    return true;
+}
+
+bool TextHelper::writeBand(QString preBand, QString newBand)
+{
+    qDebug() << "preBand: " << preBand << "  newBand: " << newBand;
+    QFile *oriFile = new QFile(Global::srcPath + "/" + Global::devicePath + "/BoardConfig.mk");
+    QFile *tempFile = new QFile(QDir::currentPath() + "/tmp/temp.txt");
+    QTextStream oriTS(oriFile);
+    QTextStream tempTS(tempFile);
+    QString strLine;
+    if(!oriFile->open(QIODevice::ReadOnly))
+    {
+        qDebug() << Global::srcPath + "/" + Global::devicePath + "/BoardConfig.mk  open fail";
+        return false;
+    }
+    if(!tempFile->open(QIODevice::WriteOnly))
+    {
+        qDebug() << "writeBand() : tempFile open fail";
+        oriFile->close();
+        return false;
+    }
+
+    int flagSkipPreBand = 0;
+    while(!oriTS.atEnd())
+    {
+        strLine = oriTS.readLine();
+        if(strLine.contains(preBand))
+        {
+            if(strLine.contains("BAND_FEID"))
+            {
+                tempTS << "#BAND_FEID := " << preBand << "\n";
+                flagSkipPreBand = 1;
+            }
+        }
+        if(strLine.contains(newBand))
+        {
+            if(strLine.contains("BAND_FEID"))
+            {
+                tempTS << "BAND_FEID := " << newBand << "\n";
+                continue;
+            }
+        }
+        if(flagSkipPreBand)
+        {
+            flagSkipPreBand = 0;
+            continue;
+        }
+        tempTS << strLine << "\n";
+    }
+
+    oriFile->close();
+    tempFile->flush();
+    tempFile->close();
+    if(!oriFile->remove())
+    {
+        qDebug() << "writeBand() oriFile remove fail";
+        return false;
+    }
+    if(!tempFile->copy(Global::srcPath + "/" + Global::devicePath + "/BoardConfig.mk"))
+    {
+        qDebug() << "writeBand() copy fail";
+        return false;
+    }
+    return true;
 }
 
 

@@ -49,7 +49,7 @@ void HardwarePage::initWidget()
     lbl_ddr_fre = new QLabel("DDR频率:");
     lbl_band    = new QLabel("3G频段");
     lbl_band->setToolTip("band1  2100\nband2  1900\nband5  850\nband8  900");
-    lbl_battery = new QLabel("电池参数");
+
 
 
     cb_screen = new QComboBox();
@@ -80,12 +80,11 @@ void HardwarePage::initWidget()
     cb_ddr_fre->addItem("455");
     cb_band = new QComboBox();
     QStringList bandList;
-    bandList << "band18_1530" << "band1_1530" << "band15_1530" << "band25_1530" << "band125_1530"
-             << "band128_1530" << "band158_1530" << "band258_1530" << "band1258_1530" << "band1_GSM900-DCS1800_1530";
+    bandList << "weibu_band18_1530" << "weibu_band1_1530" << "weibu_band15_1530" << "weibu_band25_1530" << "weibu_band125_1530"
+             << "weibu_band128_1530" << "weibu_band158_1530" << "weibu_band258_1530" << "weibu_band1258_1530" << "weibu_band1_GSM900-DCS1800_1530";
     cb_band->addItems(bandList);
 
-    le_battery = new QLineEdit();
-    le_battery->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
 
     gridLayout->addWidget(lbl_screen, 0, 0);
     gridLayout->addWidget(cb_screen, 0, 1);
@@ -100,9 +99,7 @@ void HardwarePage::initWidget()
     gridLayout->addWidget(cb_sim_num, 4, 1);
     gridLayout->addWidget(lbl_band, 5, 0);
     gridLayout->addWidget(cb_band, 5, 1);
-    gridLayout->addWidget(lbl_battery, 6, 0);
-    gridLayout->addWidget(le_battery, 6, 1);
-    gridLayout->addItem(vSpacer,  7, 0);
+    gridLayout->addItem(vSpacer,  6, 0);
     gridLayout->setSpacing(15);
 
     vLayout = new QVBoxLayout(this);
@@ -187,7 +184,7 @@ void HardwarePage::loadCfg()
         cb_screen->setCurrentIndex(0);
     }
 
-    QString strBand = textHelper.readTextStr(boardCfg, "BAND_FEID", "boardCfg");
+    strBand = textHelper.readTextStr(boardCfg, "BAND_FEID", "boardCfg");
     if(strBand == "weibu_band18_1530")
     {
         cb_band->setCurrentIndex(0);
@@ -232,6 +229,7 @@ void HardwarePage::loadCfg()
 
 void HardwarePage::saveCfg()
 {
+    disableWidget();
     QString boardCfg = Global::srcPath + "/" + Global::devicePath + "/BoardConfig.mk";
     QString dtsCfg = Global::srcPath + "/" + Global::dtsPath;
     QString kernelCfg = Global::srcPath + "/" + Global::kernelCfgPath;
@@ -268,6 +266,57 @@ void HardwarePage::saveCfg()
 
     textHelper.writeCam(preBackCamId, cb_back_cam->currentIndex(), dtsCfg);
     textHelper.writeCam(preFrontCamId + 6, cb_front_cam->currentIndex() + 6, dtsCfg);
+    if(strBand != cb_band->currentText())
+    {
+        textHelper.writeBand(strBand, cb_band->currentText());
+        strBand = cb_band->currentText();
+    }
+/*
+    switch (cb_band->currentIndex()) {
+         //weibu_band18_1530
+    case 0:
+    textHelper.writeBand(strBand, cb_band->currentText());
+        break;
+        //weibu_band1_1530
+    case 1:
+
+        break;
+        //weibu_band15_1530
+    case 2:
+
+        break;
+        //weibu_band25_1530
+    case 3:
+
+        break;
+        //weibu_band125_1530
+    case 4:
+
+        break;
+        //weibu_band128_1530
+    case 5:
+
+        break;
+        //weibu_band158_1530
+    case 6:
+
+        break;
+        //weibu_band258_1530
+    case 7:
+
+        break;
+        //weibu_band1258_1530
+    case 8:
+
+        break;
+        //weibu_band1_GSM900-DCS1800_1530
+    case 9:
+
+        break;
+    default:
+        break;
+
+    }*/
     //change current path
     QDir::setCurrent("Project/" + Global::prj_name);
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
@@ -328,5 +377,6 @@ void HardwarePage::saveCfg()
         }
     }
     QDir::setCurrent(Global::prj_home_path);
-
+    enableWidget();
+    QMessageBox::information(this, tr("Info"), tr("此页面选项修改完毕"));
 }

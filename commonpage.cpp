@@ -30,7 +30,6 @@ CommonPage::~CommonPage()
 void CommonPage::initWidget()
 {
         le_model = new QLineEdit();
-        le_model->setToolTip("有ota功能不能带空格");
         le_model->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         le_bt_name = new QLineEdit();
         le_bt_name->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -96,7 +95,7 @@ void CommonPage::initWidget()
 
 
         lbl_model = new QLabel(tr("设备型号:"));
-        lbl_model->setToolTip("有ota功能不能带空格");
+        lbl_model->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         lbl_bt_name = new QLabel(tr("蓝牙名:"));
         lbl_homepage = new QLabel(tr("浏览器主页:"));
         lbl_sleep_time = new QLabel(tr("屏幕待机:"));
@@ -136,6 +135,7 @@ void CommonPage::initWidget()
         common_scrollLayout->addWidget(le_language, 5, 1);
         common_scrollLayout->addWidget(le_country, 5, 2);
         common_scrollLayout->addWidget(btn_languageList, 5, 3);
+        common_scrollLayout->addItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum), 5, 4);
         common_scrollLayout->addWidget(lbl_displayId, 6, 0);
         common_scrollLayout->addWidget(le_displayId, 6, 1);
         common_scrollLayout->addWidget(lbl_wifi_state, 7, 0);
@@ -154,6 +154,8 @@ void CommonPage::initWidget()
         common_scrollLayout->addWidget(cb_adb_state, 11, 1);
         common_scrollLayout->addWidget(lbl_screenshot_btn, 12, 0);
         common_scrollLayout->addWidget(cb_screenshot_btn, 12, 1);
+        common_scrollLayout->addWidget(lbl_install_non_market, 13, 0);
+        common_scrollLayout->addWidget(cb_install_non_market, 13, 1);
 
        // common_scrollLayout->setColumnStretch(2,-1);
         common_scrollLayout->setSpacing(15);
@@ -211,12 +213,14 @@ void CommonPage::loadCfg()
     cb_bt_state->setCurrentIndex((textHelper.readTextStr(defSettingProvider, "def_bluetooth_on", "xml").compare("false") ? 1:0));
     cb_adb_state->setCurrentIndex((textHelper.readTextStr(sofiaMk, "persist.sys.usb.config", "mk")).contains("adb") ? 1:0);
     cb_screenshot_btn->setCurrentIndex((textHelper.readTextStr(defSettingProvider, "def_screenshot_button_show", "xml").compare("false") ? 1:0));
+    cb_install_non_market->setCurrentIndex((textHelper.readTextStr(sysProp, "ro.rk.install_non_market_apps", "prop").compare("false") ? 1:0));
 
 
 }
 
 void CommonPage::saveCfg()
 {
+    disableWidget();
     QString versionMk = Global::srcPath + "/" + Global::devicePath + "/version_id.mk";
     QString boardCfg = Global::srcPath + "/" + Global::devicePath + "/BoardConfig.mk";
     QString sofiaMk = Global::srcPath + "/" + Global::devicePath + "/sofia3gr.mk";
@@ -258,6 +262,13 @@ void CommonPage::saveCfg()
     }else
     {
         textHelper.modifyXml(defSettingProvider, "def_screenshot_button_show", "true");
+    }
+    if(cb_install_non_market->currentIndex() == 0)
+    {
+        textHelper.writeToText(sysProp, "ro.rk.install_non_market_apps", "false", "=");
+    }else
+    {
+        textHelper.writeToText(sysProp, "ro.rk.install_non_market_apps", "true", "=");
     }
 
     QDir::setCurrent("Project/" + Global::prj_name);
@@ -330,6 +341,8 @@ void CommonPage::saveCfg()
         }
     }
     QDir::setCurrent(Global::prj_home_path);
+    enableWidget();
+    QMessageBox::information(this, tr("Info"), tr("此页面选项修改完毕"));
 }
 
 void CommonPage::openLanguageList()

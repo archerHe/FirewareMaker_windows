@@ -80,6 +80,7 @@ private:
     QComboBox       *cb_adb_state;
     QLabel          *lbl_screenshot_btn;
     QComboBox       *cb_screenshot_btn;
+
 };
 
 #endif // COMMONPAGE_H

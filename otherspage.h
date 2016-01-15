@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "global.h"
 
+
 class QLabel;
 class QScrollArea;
 class QPushButton;
@@ -32,6 +33,7 @@ public:
     void copyLogo();
     void copyPreinstall();
     void copySystemApp();
+    void writeBatterypar(QString );
 public slots:
     void selectWallpaper();
     void loadCfg();

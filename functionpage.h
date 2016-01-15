@@ -2,20 +2,16 @@
 #define FUNCTIONPAGE_H
 
 #include <QWidget>
-#include <QtCore>
-#include <QtGui>
-#include <QLabel>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QComboBox>
-#include <QDebug>
-#include <QGridLayout>
-#include <QVBoxLayout>
-#include <QScrollArea>
-#include <QCheckBox>
-#include <QDir>
-#include <QFile>
 #include "global.h"
+
+class QScrollArea;
+class QGridLayout;
+class QVBoxLayout;
+class QLabel;
+class QCheckBox;
+class QProcess;
+class QFile;
+class QTextBrowser;
 
 namespace Ui {
 class FunctionPage;
@@ -36,8 +32,8 @@ public:
 public slots:
     void loadCfg();
     void saveCfg();
-    void readErr();
-    void readStdOut();
+    void processFinished();
+    void readAll();
 private:
     Ui::FunctionPage *ui;
     QScrollArea     *scrollArea;
@@ -50,9 +46,7 @@ private:
     QCheckBox       *cb_app2sd;
     QCheckBox       *cb_ptest;
     QCheckBox       *cb_speak;
-
-
-
+    QTextBrowser    *tb_readall;
 };
 
 #endif // FUNCTIONPAGE_H

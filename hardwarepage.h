@@ -56,7 +56,6 @@ private:
     QLabel *lbl_sim_num;
     QLabel *lbl_ddr_fre;
     QLabel *lbl_band;
-    QLabel *lbl_battery;
 
     QComboBox *cb_screen;
     QComboBox *cb_flash;
@@ -65,7 +64,6 @@ private:
     QComboBox *cb_sim_num;
     QComboBox *cb_ddr_fre;
     QComboBox *cb_band;
-    QLineEdit       *le_battery;
 
     QHBoxLayout *hLayout;
     QVBoxLayout *vLayout;
@@ -75,6 +73,7 @@ private:
     int CurBackCamId;
     int preFrontCamId;
     int CurFrontCamId;
+    QString strBand;
 };
 
 #endif // HARDWAREPAGE_H
